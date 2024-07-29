@@ -10,14 +10,12 @@ router.get('/:match_id', async (req, res) => {
     try {
         const matchId = req.params.match_id;
 
-        // Получение детальной информации о матче
         const matchDetails = await getMatchDetail(matchId);
 
         if (!matchDetails) {
             return res.status(404).json({ msg: 'Match not found' });
         }
 
-        // Генерация рекомендаций на основе данных матча
         const recommendations = await generateRecommendations(matchDetails);
 
         res.json({ matchDetails, recommendations });
