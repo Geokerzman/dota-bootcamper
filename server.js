@@ -12,6 +12,9 @@ const app = express();
 // connectDB();
 
 // Middleware
+
+
+
 app.use(express.json()); // for parsing application/json
 
 // Routes
@@ -20,6 +23,7 @@ app.use('/api/steam', authMiddleware, require('./routes/steamRoutes'));
 app.use('/api/matches', authMiddleware, require('./routes/matchRoutes'));
 app.use('/api/leaderboard', require('./routes/leaderboardRoutes')); // Correctly connect leaderboard routes
 app.use('/api/matchdetails', authMiddleware, require('./routes/matchDetailRoutes'));
+app.use('/api/players', require('./routes/playerSearchRoutes'));
 
 // Sync database models
 // sequelize.sync()
