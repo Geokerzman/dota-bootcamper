@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 
 // Connect to the database
-connectDB();
+// connectDB();
 
 // Middleware
 app.use(express.json()); // for parsing application/json
@@ -18,13 +18,13 @@ app.use(express.json()); // for parsing application/json
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/steam', authMiddleware, require('./routes/steamRoutes'));
 app.use('/api/matches', authMiddleware, require('./routes/matchRoutes'));
-app.use('/api/leaderboard', require('./routes/leaderboardRoutes'));
+app.use('/api/leaderboard', require('./routes/leaderboardRoutes')); // Correctly connect leaderboard routes
 app.use('/api/matchdetails', authMiddleware, require('./routes/matchDetailRoutes'));
 
 // Sync database models
-sequelize.sync()
-    .then(() => console.log('Database synchronized'))
-    .catch((err) => console.error('Error syncing database:', err));
+// sequelize.sync()
+//     .then(() => console.log('Database synchronized'))
+//     .catch((err) => console.error('Error syncing database:', err));
 
 // Start server
 const PORT = process.env.PORT || 5000;
