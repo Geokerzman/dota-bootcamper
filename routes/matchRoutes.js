@@ -1,5 +1,5 @@
 const express = require('express');
-const { getMatchHistory } = require('../utils/steamApi');
+const { getMatchHistory } = require('../utils/openDotaApi');
 const User = require('../models/user');
 const router = express.Router();
 

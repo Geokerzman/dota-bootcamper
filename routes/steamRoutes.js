@@ -1,10 +1,10 @@
 const express = require('express');
-const { getPlayerSummaries, getMatchHistory } = require('../utils/steamApi');
+const { getPlayerSummaries, getMatchHistory } = require('../utils/openDotaApi');
 const User = require('../models/user');
 const router = express.Router();
 
 // @route    POST api/steam/link
-// @desc     Link Steam account to user
+// @desc     Link Steam account to use
 // @access   Private
 router.post('/link', async (req, res) => {
     const { steamid } = req.body;
