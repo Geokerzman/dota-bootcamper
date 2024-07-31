@@ -27,7 +27,7 @@ app.use('/api/match', require('./routes/matchSummary'));
 app.use('/api/recentpromatches', require('./routes/recentProMatches'));
 app.use('/api/recentmatches', require('./routes/recentMatches'));
 app.use('/api/heroes', require('./routes/heroesRoutes'));
-
+app.use('/api/live', require('./routes/getLiveGamesRoutes'));
 // Sync database models
 // sequelize.sync()
 //     .then(() => console.log('Database synchronized'))
