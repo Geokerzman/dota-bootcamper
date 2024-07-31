@@ -21,9 +21,11 @@ app.use(express.json()); // for parsing application/json
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/steam', authMiddleware, require('./routes/steamRoutes'));
 app.use('/api/matches', authMiddleware, require('./routes/matchRoutes'));
-app.use('/api/leaderboard', require('./routes/leaderboardRoutes')); // Correctly connect leaderboard routes
+app.use('/api/leaderboard', require('./routes/leaderboardRoutes'));
 app.use('/api/matchdetails', authMiddleware, require('./routes/matchDetailRoutes'));
 app.use('/api/match', require('./routes/matchSummary'));
+app.use('/api/recentpromatches', require('./routes/recentProMatches'));
+app.use('/api/recentmatches', require('./routes/recentMatches'));
 
 // Sync database models
 // sequelize.sync()
