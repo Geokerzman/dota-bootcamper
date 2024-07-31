@@ -26,6 +26,7 @@ app.use('/api/matchdetails', authMiddleware, require('./routes/matchDetailRoutes
 app.use('/api/match', require('./routes/matchSummary'));
 app.use('/api/recentpromatches', require('./routes/recentProMatches'));
 app.use('/api/recentmatches', require('./routes/recentMatches'));
+app.use('/api/heroes', require('./routes/heroesRoutes'));
 
 // Sync database models
 // sequelize.sync()
