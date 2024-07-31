@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
             return res.status(500).send('Unexpected response format from OpenDota API');
         }
 
-        const formattedMatches = response.data.map(hero => ({
+        const heroesInfo = response.data.map(hero => ({
             id: hero.id,
             name: hero.name,
             localized_name: hero.localized_name,
@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
             roles:hero.roles,
         }));
 
-        res.json(formattedMatches);
+        res.json(heroesInfo);
     } catch (err) {
         console.error('Error fetching data from OpenDota API:', err.response ? err.response.data : err.message);
         res.status(500).send('Server error');
