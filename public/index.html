@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dota 2 Match Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        input[type="submit"] {
+            padding: 8px 16px;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+<h1>Dota 2 Match Data</h1>
+<form id="matchForm">
+    <label for="match_id">Enter Match ID:</label>
+    <input type="text" id="match_id" name="match_id" required>
+    <input type="submit" value="Get Match Data">
+</form>
+<div class="results" id="results">
+    <!-- Results will be displayed here -->
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#matchForm').on('submit', function(event) {
+            event.preventDefault();
+            const matchId = $('#match_id').val();
+
+            $.ajax({
+                url: `/api/data?match_id=${matchId}`,
+                method: 'GET',
+                success: function(data) {
+                    let resultHtml = '<h2>Match Details</h2>';
+                    resultHtml += `<p><strong>Match ID:</strong> ${data.match_id}</p>`;
+                    resultHtml += `<p><strong>Duration:</strong> ${data.duration} seconds</p>`;
+                    resultHtml += `<p><strong>Radiant Team:</strong> ${data.radiant_name || 'Unknown'}</p>`;
+                    resultHtml += `<p><strong>Dire Team:</strong> ${data.dire_name || 'Unknown'}</p>`;
+                    resultHtml += `<p><strong>Winner:</strong> ${data.radiant_win ? 'Radiant' : 'Dire'}</p>`;
+                    $('#results').html(resultHtml);
+                },
+                error: function(err) {
+                    $('#results').html('<p>Error fetching match data. Please try again.</p>');
+                    console.error('Error fetching match data:', err);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

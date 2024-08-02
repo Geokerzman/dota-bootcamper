@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const { connectDB, sequelize } = require('./config/database');
 const authMiddleware = require('./middleware/authMiddleware');
+const path = require('path');
 
 // Load environment variables
 dotenv.config();
@@ -17,7 +18,11 @@ const app = express();
 
 app.use(express.json()); // for parsing application/json
 
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Routes
+app.use('/api', require('./routes/apiRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/steam', authMiddleware, require('./routes/steamRoutes'));
 app.use('/api/matches', authMiddleware, require('./routes/matchRoutes'));
