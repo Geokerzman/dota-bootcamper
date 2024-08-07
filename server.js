@@ -22,7 +22,6 @@ app.use(express.json()); // for parsing application/json
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
-app.use('/api', require('./routes/apiRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/steam', authMiddleware, require('./routes/steamRoutes'));
 app.use('/api/matches', authMiddleware, require('./routes/matchRoutes'));
@@ -33,6 +32,13 @@ app.use('/api/recentpromatches', require('./routes/recentProMatches'));
 app.use('/api/recentmatches', require('./routes/recentMatches'));
 app.use('/api/heroes', require('./routes/heroesRoutes'));
 app.use('/api/live', require('./routes/getLiveGamesRoutes'));
+app.use('/api/playerinfo',require('./routes/playerinfoRoutes'));
+
+
+app.get('/player', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'player.html'));
+});
+
 // Sync database models
 // sequelize.sync()
 //     .then(() => console.log('Database synchronized'))

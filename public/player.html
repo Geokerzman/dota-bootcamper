@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dota 2 Player Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        input[type="submit"] {
+            padding: 8px 16px;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .player {
+            margin-bottom: 10px;
+        }
+
+        img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Dota 2 Player Data</h1>
+<form id="playerForm">
+    <label for="account_id">Enter Account ID:</label>
+    <input type="text" id="account_id" name="account_id" required>
+    <input type="submit" value="Get Player Data">
+</form>
+<div class="results" id="results">
+    <!-- Results will be displayed here -->
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#playerForm').on('submit', function(event) {
+            event.preventDefault();
+            const accountId = $('#account_id').val();
+
+            $.ajax({
+                url: `/api/playerinfo?account_id=${accountId}`,
+                method: 'GET',
+                success: function(data) {
+                    if (data.length === 0) {
+                        $('#results').html('<p>No data found for this account ID.</p>');
+                        return;
+                    }
+
+                    let resultHtml = '<h2>Player Details</h2>';
+                    data.forEach(player => {
+                        resultHtml += '<div class="player">';
+                        resultHtml += `<p><strong>Player Name:</strong> ${player.profile.personaname || 'Unknown'}</p>`;
+                        resultHtml += `<p><strong>Solo Competitive Rank:</strong> ${player.solo_competitive_rank || 'N/A'}</p>`;
+                        resultHtml += `<p><strong>Competitive Rank:</strong> ${player.competitive_rank || 'N/A'}</p>`;
+                        resultHtml += `<p><strong>Rank Tier:</strong> ${player.rank_tier || 'N/A'}</p>`;
+                        resultHtml += `<p><strong>Leaderboard Rank:</strong> ${player.leaderboard_rank || 'N/A'}</p>`;
+                        resultHtml += `<img src="${player.profile.avatarmedium}" alt="Avatar">`;
+                        resultHtml += `<p><a href="${player.profile.profileurl}" target="_blank">Profile Link</a></p>`;
+                        resultHtml += '</div>';
+                    });
+
+                    $('#results').html(resultHtml);
+                },
+                error: function(err) {
+                    $('#results').html('<p>Error fetching player data. Please try again.</p>');
+                    console.error('Error fetching player data:', err);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
