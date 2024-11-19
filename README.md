@@ -1,6 +1,6 @@
-# Dota Stats Tracker
+# Dota-bootcamper
 
-Dota Stats Tracker is a web application designed to provide detailed statistics and insights for Dota 2 players. Using the OpenDota API, the application fetches and displays data such as player information, match history, live games, leaderboards, and hero stats. The backend is built with Node.js and Express, and the frontend is powered by React.
+Dota-bootcamper is a web application designed to provide detailed statistics and insights for Dota 2 players. Using the OpenDota API, the application fetches and displays data such as player information, match history, live games, leaderboards, and hero stats. The backend is built with Node.js and Express, and the frontend is powered by React.
 
 ---
 
@@ -32,30 +32,6 @@ Dota Stats Tracker is a web application designed to provide detailed statistics 
 
 ---
 
-## Project Structure
-
-
-.
-├── config/
-│   ├── database.js       # Database connection and Sequelize setup
-├── middleware/
-│   ├── authMiddleware.js # Middleware for authentication
-├── public/
-│   ├── player.html       # Static HTML file for player stats page
-├── routes/
-│   ├── authRoutes.js          # Routes for authentication
-│   ├── steamRoutes.js         # Steam API integration routes
-│   ├── matchRoutes.js         # Routes for match data
-│   ├── leaderboardRoutes.js   # Leaderboard-related routes
-│   ├── heroesRoutes.js        # Hero data routes
-│   ├── recentProMatches.js    # Recent pro matches routes
-│   ├── recentMatches.js       # Recent matches routes
-│   ├── getLiveGamesRoutes.js  # Live games routes
-│   ├── playerinfoRoutes.js    # Player information routes
-├── server.js                 # Main server file
-└── README.md                 # Project documentation
-.
----
 
 ## Main API Endpoints
 
