@@ -62,12 +62,12 @@ Dota-bootcamper is a web application designed to provide detailed statistics and
 ### Set up your environment variables
 Create a `.env` file in the root directory and configure the following:
 
-PORT=5000
-DB_HOST=your_database_host
-DB_USER=your_database_user
-DB_PASSWORD=your_database_password
-DB_NAME=your_database_name
-API_KEY=your_opendota_api_key
+- PORT=5000
+- DB_HOST=your_database_host
+- DB_USER=your_database_user
+- DB_PASSWORD=your_database_password
+- DB_NAME=your_database_name
+- API_KEY=your_opendota_api_key
 
 ---
 
