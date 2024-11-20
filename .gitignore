@@ -5,3 +5,5 @@
 .idea/php.xml
 .idea/vcs.xml
 .env
+node_modules
+.idea
