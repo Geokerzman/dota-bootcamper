@@ -12,10 +12,12 @@ const MatchForm = () => {
         setMatchData(null);
 
         try {
-            const response = await axios.get(`/api/data?match_id=${matchId}`);
+            // Замените на правильный путь к вашему серверу
+            const response = await axios.get(`http://localhost:3080/api/match/${matchId}`);
             setMatchData(response.data);
         } catch (err) {
-            setError('Error fetching match data. Please try again.');
+            // Вывод ошибки при неудачном запросе
+            setError('Ошибка при получении данных о матче. Попробуйте снова.');
             console.error('Error fetching match data:', err);
         }
     };
@@ -24,7 +26,7 @@ const MatchForm = () => {
         <div style={styles.container}>
             <h1 style={styles.heading}>Dota 2 Match Data</h1>
             <form onSubmit={handleSubmit} style={styles.form}>
-                <label htmlFor="match_id" style={styles.label}>Enter Match ID:</label>
+                <label htmlFor="match_id" style={styles.label}>Введите ID матча:</label>
                 <input
                     type="text"
                     id="match_id"
@@ -34,17 +36,17 @@ const MatchForm = () => {
                     required
                     style={styles.input}
                 />
-                <button type="submit" style={styles.button}>Get Match Data</button>
+                <button type="submit" style={styles.button}>Получить данные</button>
             </form>
             {error && <p style={styles.error}>{error}</p>}
             {matchData && (
                 <div style={styles.results}>
-                    <h2>Match Details</h2>
-                    <p><strong>Match ID:</strong> {matchData.match_id}</p>
-                    <p><strong>Duration:</strong> {matchData.duration} seconds</p>
-                    <p><strong>Radiant Team:</strong> {matchData.radiant_name || 'Unknown'}</p>
-                    <p><strong>Dire Team:</strong> {matchData.dire_name || 'Unknown'}</p>
-                    <p><strong>Winner:</strong> {matchData.radiant_win ? 'Radiant' : 'Dire'}</p>
+                    <h2>Детали матча</h2>
+                    <p><strong>ID матча:</strong> {matchData.match_id}</p>
+                    <p><strong>Длительность:</strong> {matchData.duration} секунд</p>
+                    <p><strong>Команда Radiant:</strong> {matchData.radiant_name || 'Неизвестно'}</p>
+                    <p><strong>Команда Dire:</strong> {matchData.dire_name || 'Неизвестно'}</p>
+                    <p><strong>Победитель:</strong> {matchData.radiant_win ? 'Radiant' : 'Dire'}</p>
                 </div>
             )}
         </div>

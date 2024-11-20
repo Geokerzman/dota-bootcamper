@@ -33,7 +33,7 @@
     </style>
 </head>
 <body>
-<h1>Dota 2 Match Data</h1>
+<h1>Dota 2 Match Data 2</h1>
 <form id="matchForm">
     <label for="match_id">Enter Match ID:</label>
     <input type="text" id="match_id" name="match_id" required>
@@ -50,8 +50,14 @@
             event.preventDefault();
             const matchId = $('#match_id').val();
 
+            // Проверяем, что введен ID
+            if (!matchId) {
+                $('#results').html('<p>Please enter a Match ID.</p>');
+                return;
+            }
+
             $.ajax({
-                url: `/api/data?match_id=${matchId}`,
+                url: `/api/match/${matchId}`, // Используем правильный путь
                 method: 'GET',
                 success: function(data) {
                     let resultHtml = '<h2>Match Details</h2>';
