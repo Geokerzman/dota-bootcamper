@@ -1,0 +1,110 @@
+:root {
+    --gradient-right: rgba(248, 70, 180, 0.301);
+    --gradient-left: rgba(9, 243, 99, 0.247);
+    --gradient-background: #1b2838;
+    --gradient-background-right: rgba(70, 227, 248, 0);
+    --gradient-background-left: rgba(239, 243, 9, 0.13);
+    --btn-background: rgb(90, 40, 92);
+    --btn-background-hover: rgb(100, 50, 102);
+    --text-color: #8F98A0;
+    --font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: var(--gradient-background);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 952px;
+    margin-top: 40px;
+    padding: 20px;
+    background: radial-gradient(farthest-side at top right, var(--gradient-right), transparent 500px),
+    radial-gradient(farthest-corner at top left, var(--gradient-left), transparent 600px),
+    radial-gradient(farthest-corner at bottom right, var(--gradient-background-right), transparent 500px),
+    radial-gradient(farthest-corner at bottom left, var(--gradient-background-left), transparent 600px),
+    var(--gradient-background);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    padding-bottom: 40px;
+}
+
+.card {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.card-header {
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px;
+}
+
+.card-body {
+    padding: 15px;
+    color: var(--text-color);
+}
+
+h1, h2, h3 {
+    color: #FFFFFF;
+}
+
+input.form-control {
+    background-color: #2a394f;
+    color: #FFFFFF;
+    border: 1px solid #394b59;
+    border-radius: 4px;
+}
+
+input.form-control:focus {
+    outline: none;
+    border-color: var(--btn-background-hover);
+    box-shadow: 0 0 8px var(--btn-background-hover);
+}
+
+.btn-primary {
+    background-color: var(--btn-background);
+    border-color: var(--btn-background);
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.btn-primary:hover {
+    background-color: var(--btn-background-hover);
+    border-color: var(--btn-background-hover);
+}
+
+.profile-summary {
+    text-align: left;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #d1d1d1;
+}
+
+.list-group-item {
+    background-color: #2a394f;
+    color: #FFFFFF;
+}
+
+.list-group-item:first-child {
+    border-radius: 4px 4px 0 0;
+}
+
+.list-group-item:last-child {
+    border-radius: 0 0 4px 4px;
+}
+
+a {
+    color: #66c0f4;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
