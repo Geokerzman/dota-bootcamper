@@ -12,21 +12,6 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Dota 2 Data Viewer</h1>
 
-    <!-- Player Info Section -->
-    <div class="card mb-5">
-        <div class="card-header">
-            <h2>Player Information</h2>
-        </div>
-        <div class="card-body">
-            <div class="mb-3">
-                <label for="accountIdInput" class="form-label">Enter Account ID:</label>
-                <input type="text" id="accountIdInput" class="form-control" placeholder="Enter account ID">
-            </div>
-            <button id="fetchPlayerButton" class="btn btn-primary w-100">Fetch Player Info</button>
-            <div id="playerInfoContainer" class="mt-4"></div>
-        </div>
-    </div>
-
     <!-- Match Data Section -->
     <div class="card">
         <div class="card-header">
@@ -47,54 +32,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Player Info Fetch
-    document.getElementById('fetchPlayerButton').addEventListener('click', async () => {
-        const accountId = document.getElementById('accountIdInput').value;
-        const playerInfoContainer = document.getElementById('playerInfoContainer');
-
-        if (!accountId) {
-            playerInfoContainer.innerHTML = `<div class="alert alert-danger">Account ID is required!</div>`;
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/playerinfo?account_id=${accountId}`);
-            const data = await response.json();
-
-            if (response.ok && data.length > 0) {
-                const player = data[0];
-                const profile = player.profile;
-
-                playerInfoContainer.innerHTML = `
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>${profile.personaname || "Unknown Player"}</h3>
-                            </div>
-                            <div class="card-body">
-                                <img src="${profile.avatarmedium}" alt="Player Avatar" class="img-thumbnail mb-3">
-                                <ul class="list-group">
-                                    <li class="list-group-item"><strong>Account ID:</strong> ${profile.account_id}</li>
-                                    <li class="list-group-item"><strong>Name:</strong> ${profile.name || "N/A"}</li>
-                                    <li class="list-group-item"><strong>Steam ID:</strong> ${profile.steamid}</li>
-                                    <li class="list-group-item"><strong>Last Login:</strong> ${profile.last_login || "N/A"}</li>
-                                    <li class="list-group-item"><strong>Rank Tier:</strong> ${player.rank_tier || "N/A"}</li>
-                                    <li class="list-group-item"><strong>Leaderboard Rank:</strong> ${player.leaderboard_rank || "N/A"}</li>
-                                    <li class="list-group-item"><strong>Solo Competitive Rank:</strong> ${player.solo_competitive_rank || "N/A"}</li>
-                                    <li class="list-group-item"><strong>Competitive Rank:</strong> ${player.competitive_rank || "N/A"}</li>
-                                </ul>
-                                <a href="${profile.profileurl}" target="_blank" class="btn btn-primary mt-3">View Steam Profile</a>
-                            </div>
-                        </div>
-                    `;
-            } else {
-                playerInfoContainer.innerHTML = `<div class="alert alert-warning">No data found for this Account ID.</div>`;
-            }
-        } catch (err) {
-            console.error(err);
-            playerInfoContainer.innerHTML = `<div class="alert alert-danger">Failed to fetch player info.</div>`;
-        }
-    });
-
     // Match Data Fetch
     $(document).ready(function() {
         $('#matchForm').on('submit', function(event) {
@@ -107,7 +44,7 @@
             }
 
             $.ajax({
-                url: `/api/matchdata?match_id=${matchId}`,
+                url: `/api/match/${matchId}`,
                 method: 'GET',
                 success: function(data) {
                     if (data && data.players) {

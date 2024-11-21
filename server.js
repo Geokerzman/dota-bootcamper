@@ -35,6 +35,7 @@ app.use('/api/live', require('./routes/getLiveGamesRoutes'));
 app.use('/api/playerinfo',require('./routes/playerinfoRoutes'));
 
 
+
 app.get('/player', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'player.html'));
 });
