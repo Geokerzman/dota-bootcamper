@@ -33,6 +33,7 @@ app.use('/api/recentmatches', require('./routes/recentMatches'));
 app.use('/api/heroes', require('./routes/heroesRoutes'));
 app.use('/api/live', require('./routes/getLiveGamesRoutes'));
 app.use('/api/playerinfo',require('./routes/playerinfoRoutes'));
+app.use('/api/proplayers', require('./routes/proPlayersRoutes'));
 
 
 
