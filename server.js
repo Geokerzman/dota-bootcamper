@@ -32,12 +32,16 @@ app.use('/api/recentpromatches', require('./routes/recentProMatches'));
 app.use('/api/recentmatches', require('./routes/recentMatches'));
 app.use('/api/heroes', require('./routes/heroesRoutes'));
 app.use('/api/live', require('./routes/getLiveGamesRoutes'));
-app.use('/api/playerinfo',require('./routes/playerinfoRoutes'));
+app.use('/api/playerinfo',require('./routes/playerInfoRoutes'));
+app.use('/api/proplayers', require('./routes/proPlayersRoutes'));
 
 
 
 app.get('/player', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'player.html'));
+});
+app.get('/pros', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'proPlayers.html'));
 });
 
 // Sync database models

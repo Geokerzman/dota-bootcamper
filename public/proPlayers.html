@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dota 2 Player Info</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Dota 2 Pro Players Info Viewer</h1>
+
+  <!-- Player Info Section -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Pro Players Info</h2>
+    </div>
+    <div class="card-body">
+      <form id="proPlayersForm" class="mb-3">
+        <label class="form-label">Click to load pro players:</label>
+        <button type="submit" class="btn btn-primary w-100">Get Player Info</button>
+      </form>
+      <div id="playerResults"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    // Player Info Form Submission
+    $('#proPlayersForm').on('submit', function(event) {
+      event.preventDefault();
+
+      // Fetch player information
+      $.ajax({
+        url: `/api/proPlayers`,
+        method: 'GET',
+                success: function(data) {
+                  console.log(data); // Убедитесь, что структура данных правильная
+
+                  if (data && data.length > 0) {
+                    let resultHtml = '<h3>Pro Player Details</h3>';
+                    // Пройдем по всем игрокам
+                    data.forEach(player => {
+                      resultHtml += `
+              <div class="player-card">
+                <img src="${player.avatarmedium || 'default-avatar.jpg'}" alt="Player Avatar" class="img-thumbnail mb-3">
+                <p><strong>Account ID:</strong> ${player.account_id || "N/A"}</p>
+                <p><strong>Steam ID:</strong> ${player.steamid || "N/A"}</p>
+                <p><strong>Persona Name:</strong> ${player.personaname || "N/A"}</p>
+                <p><strong>Nickname:</strong> ${player.name || "N/A"}</p>
+                <p><strong>Team Name:</strong> ${player.team_name || "N/A"}</p>
+                <p><strong>Last Login:</strong> ${player.last_login || "N/A"}</p>
+                <a href="${player.profileurl}" target="_blank" class="btn btn-secondary mt-3">View Steam Profile</a>
+
+              </div>
+            `;
+                    });
+                    $('#playerResults').html(resultHtml);
+                  } else {
+                    $('#playerResults').html('<div class="alert alert-warning">No players data found.</div>');
+                  }
+                },
+
+        error: function() {
+          $('#playerResults').html('<div class="alert alert-danger">Error fetching players data.</div>');
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
