@@ -6,34 +6,31 @@ const router = express.Router();
 // @desc     Get proPlayers list
 // @access   Public
 router.get('/', async (req, res) => {
-
-
     try {
-        const response = await axios.get(`https://api.opendota.com/api/proPlayers`);
+        const response = await axios.get('https://api.opendota.com/api/proPlayers');
 
-        console.log('API Response:', response.data);
-
-        if (!response.data) {
-            console.error('Unexpected response format:', response.data);
-            return res.status(500).send('Unexpected response format from OpenDota API');
+        if (!Array.isArray(response.data) || response.data.length === 0) {
+            console.error('No data returned from OpenDota API');
+            return res.status(404).json({ message: 'No pro players found' });
         }
 
-        const proPlayers = {
-                account_id: response.data.account_id,
-                personaname: response.data.personaname,
-                name: response.data.name,
-                steamid: response.data.steamid,
-                avatarmedium: response.data.avatarmedium,
-                last_login: response.data.last_login,
-                profileurl: response.data.profileurl,
-                team_id:response.data.team_id,
-                team_name: response.data.team_name,
-        };
+        // Transform and filter the data
+        const proPlayers = response.data.map(player => ({
+            account_id: player.account_id,
+            personaname: player.personaname || 'N/A',
+            name: player.name || 'N/A',
+            steamid: player.steamid,
+            avatarmedium: player.avatarmedium || '',
+            last_login: player.last_login || 'N/A',
+            profileurl: player.profileurl,
+            team_id: player.team_id || 'N/A',
+            team_name: player.team_name || 'N/A',
+        }));
 
-        res.json([proPlayers]); // Return as an array to match the client-side expectations
+        res.json(proPlayers); // Send transformed data
     } catch (err) {
-        console.error('Error fetching data from OpenDota API:', err.response ? err.response.data : err.message);
-        res.status(500).send('Server error');
+        console.error('Error fetching data from OpenDota API:', err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
 
