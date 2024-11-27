@@ -13,7 +13,7 @@
     <h1 class="text-center mb-4">Dota 2 Player Info Viewer</h1>
 
     <!-- Player Info Section -->
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header">
             <h2>Player Info</h2>
         </div>
@@ -24,6 +24,28 @@
                 <button type="submit" class="btn btn-primary w-100">Get Player Info</button>
             </form>
             <div id="playerResults"></div>
+        </div>
+    </div>
+
+    <!-- Advanced Stats Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Advanced Player Stats</h2>
+        </div>
+        <div class="card-body">
+            <form id="advancedStatsForm" class="mb-3">
+                <input type="hidden" id="account_id_stats" required>
+                <label for="statType" class="form-label">Select Stat Type:</label>
+                <select id="statType" class="form-select mb-3">
+                    <option value="totals">Totals</option>
+                    <option value="counts">Counts</option>
+                    <option value="histograms">Histograms</option>
+                </select>
+                <label for="field" class="form-label">Field (only for Histograms):</label>
+                <input type="text" id="field" class="form-control mb-3" placeholder="Enter Field (e.g., kills)">
+                <button type="submit" class="btn btn-secondary w-100">Get Stats</button>
+            </form>
+            <div id="statsResults"></div>
         </div>
     </div>
 </div>
@@ -37,6 +59,7 @@
         $('#playerForm').on('submit', function(event) {
             event.preventDefault();
             const accountId = $('#account_id').val();
+            $('#account_id_stats').val(accountId); // Pre-fill for advanced stats
 
             if (!accountId) {
                 $('#playerResults').html('<div class="alert alert-danger">Please enter an Account ID.</div>');
@@ -65,6 +88,46 @@
                 },
                 error: function() {
                     $('#playerResults').html('<div class="alert alert-danger">Error fetching player data.</div>');
+                }
+            });
+        });
+
+        // Advanced Stats Form Submission
+        $('#advancedStatsForm').on('submit', function(event) {
+            event.preventDefault();
+            const accountId = $('#account_id_stats').val();
+            const statType = $('#statType').val();
+            const field = $('#field').val();
+
+            if (!accountId) {
+                $('#statsResults').html('<div class="alert alert-danger">Please fetch player info first.</div>');
+                return;
+            }
+
+            if (statType === 'histograms' && !field) {
+                $('#statsResults').html('<div class="alert alert-danger">Please enter a field for histograms.</div>');
+                return;
+            }
+
+            let url = `/api/playerinfo/${statType}?account_id=${accountId}`;
+            if (statType === 'histograms') {
+                url += `&field=${field}`;
+            }
+
+            // Fetch advanced stats
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function(data) {
+                    if (data) {
+                        let resultHtml = `<h3>${statType.charAt(0).toUpperCase() + statType.slice(1)} Stats</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                        $('#statsResults').html(resultHtml);
+                    } else {
+                        $('#statsResults').html('<div class="alert alert-warning">No stats data found.</div>');
+                    }
+                },
+                error: function() {
+                    $('#statsResults').html('<div class="alert alert-danger">Error fetching stats data.</div>');
                 }
             });
         });

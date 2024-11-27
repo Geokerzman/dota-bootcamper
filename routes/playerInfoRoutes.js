@@ -45,4 +45,73 @@ router.get('/', async (req, res) => {
     }
 });
 
+// @route    GET api/playerinfo/totals
+// @desc     Get player totals by account ID
+// @access   Public
+router.get('/totals', async (req, res) => {
+    console.log('Request for /totals received');
+    const { account_id, ...query } = req.query;
+
+    if (!account_id) {
+        return res.status(400).json({ msg: 'Account ID is required' });
+    }
+
+    try {
+        const response = await axios.get(`https://api.opendota.com/api/players/${account_id}/totals`, {
+            params: query
+        });
+
+        res.json(response.data);
+    } catch (err) {
+        console.error('Error fetching totals:', err.response ? err.response.data : err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+
+// @route    GET api/playerinfo/counts
+// @desc     Get player counts by account ID
+// @access   Public
+router.get('/counts', async (req, res) => {
+    const { account_id, ...query } = req.query;
+
+    if (!account_id) {
+        return res.status(400).json({ msg: 'Account ID is required' });
+    }
+
+    try {
+        const response = await axios.get(`https://api.opendota.com/api/players/${account_id}/counts`, {
+            params: query
+        });
+
+        res.json(response.data);
+    } catch (err) {
+        console.error('Error fetching counts:', err.response ? err.response.data : err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route    GET api/playerinfo/histograms
+// @desc     Get player histograms by account ID and field
+// @access   Public
+router.get('/histograms', async (req, res) => {
+    const { account_id, field, ...query } = req.query;
+
+    if (!account_id || !field) {
+        return res.status(400).json({ msg: 'Account ID and field are required' });
+    }
+
+    try {
+        // Изменение URL для гистограмм
+        const response = await axios.get(`https://api.opendota.com/api/players/${account_id}/histograms/${field}`, {
+            params: query  // передаем дополнительные параметры, если есть
+        });
+
+        res.json(response.data);
+    } catch (err) {
+        console.error('Error fetching histograms:', err.response ? err.response.data : err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 module.exports = router;
