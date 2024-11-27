@@ -44,6 +44,10 @@ app.get('/pros', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'proPlayers.html'));
 });
 
+app.get('/live', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'live.html'));
+});
+
 // Sync database models
 // sequelize.sync()
 //     .then(() => console.log('Database synchronized'))
