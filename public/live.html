@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dota 2 Live Games and Scenarios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">Dota 2 Live Games and Scenarios</h1>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mt-4" id="tabMenu" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="live-tab" data-bs-toggle="tab" data-bs-target="#live" type="button" role="tab">Live Games</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="item-tab" data-bs-toggle="tab" data-bs-target="#item" type="button" role="tab">Item Timings</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="lane-tab" data-bs-toggle="tab" data-bs-target="#lane" type="button" role="tab">Lane Roles</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="misc-tab" data-bs-toggle="tab" data-bs-target="#misc" type="button" role="tab">Misc Scenarios</button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content mt-4" id="tabContent">
+        <!-- Live Games Tab -->
+        <div class="tab-pane fade show active" id="live" role="tabpanel">
+            <div id="liveGames" class="row"></div>
+        </div>
+
+        <!-- Item Timings Tab -->
+        <div class="tab-pane fade" id="item" role="tabpanel">
+            <form id="itemForm" class="mb-3">
+                <div class="mb-3">
+                    <label for="itemName" class="form-label">Item Name</label>
+                    <input type="text" id="itemName" class="form-control" placeholder="e.g., spirit_vessel">
+                </div>
+                <div class="mb-3">
+                    <label for="heroIdItem" class="form-label">Hero ID</label>
+                    <input type="number" id="heroIdItem" class="form-control" placeholder="e.g., 1">
+                </div>
+                <button type="submit" class="btn btn-primary">Get Item Timings</button>
+            </form>
+            <div id="itemResults"></div>
+        </div>
+
+        <!-- Lane Roles Tab -->
+        <div class="tab-pane fade" id="lane" role="tabpanel">
+            <form id="laneForm" class="mb-3">
+                <div class="mb-3">
+                    <label for="laneRole" class="form-label">Lane Role</label>
+                    <select id="laneRole" class="form-select">
+                        <option value="1">Safe Lane</option>
+                        <option value="2">Mid Lane</option>
+                        <option value="3">Off Lane</option>
+                        <option value="4">Jungle</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="heroIdLane" class="form-label">Hero ID</label>
+                    <input type="number" id="heroIdLane" class="form-control" placeholder="e.g., 1">
+                </div>
+                <button type="submit" class="btn btn-primary">Get Lane Roles</button>
+            </form>
+            <div id="laneResults"></div>
+        </div>
+
+        <!-- Misc Scenarios Tab -->
+        <div class="tab-pane fade" id="misc" role="tabpanel">
+            <form id="miscForm" class="mb-3">
+                <div class="mb-3">
+                    <label for="scenario" class="form-label">Scenario Name</label>
+                    <input type="text" id="scenario" class="form-control" placeholder="e.g., comeback">
+                </div>
+                <button type="submit" class="btn btn-primary">Get Misc Scenarios</button>
+            </form>
+            <div id="miscResults"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(() => {
+        // Fetch live matches
+        $.get('/api/live', (data) => {
+            if (data && data.length > 0) {
+                const liveGamesHtml = data.map(game => `
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5>League: ${game.league_name || 'Unknown'}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Match ID:</strong> ${game.match_id}</p>
+                                <p><strong>Spectators:</strong> ${game.spectators || '0'}</p>
+                                <p><strong>Radiant Team:</strong> ${game.radiant_team || 'N/A'}</p>
+                                <p><strong>Dire Team:</strong> ${game.dire_team || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                $('#liveGames').html(liveGamesHtml);
+            } else {
+                $('#liveGames').html('<div class="alert alert-warning">No live matches available at the moment.</div>');
+            }
+        }).fail(() => {
+            $('#liveGames').html('<div class="alert alert-danger">Failed to load live games.</div>');
+        });
+
+        // Handle item timings form submission
+        $('#itemForm').on('submit', function(event) {
+            event.preventDefault();
+            const item = $('#itemName').val();
+            const heroId = $('#heroIdItem').val();
+
+            $.get(`/api/scenarios/itemTimings?item=${item}&hero_id=${heroId}`, (data) => {
+                if (data && data.length > 0) {
+                    const resultsHtml = data.map(result => `
+                        <div>
+                            <p><strong>Hero ID:</strong> ${result.hero_id}</p>
+                            <p><strong>Item:</strong> ${result.item}</p>
+                            <p><strong>Time:</strong> ${result.time}</p>
+                            <p><strong>Games:</strong> ${result.games}</p>
+                            <p><strong>Wins:</strong> ${result.wins}</p>
+                        </div>
+                    `).join('');
+                    $('#itemResults').html(resultsHtml);
+                } else {
+                    $('#itemResults').html('<div class="alert alert-warning">No data found for the specified item timings.</div>');
+                }
+            }).fail(() => {
+                $('#itemResults').html('<div class="alert alert-danger">Failed to fetch item timings data.</div>');
+            });
+        });
+
+        // Handle lane roles form submission
+        $('#laneForm').on('submit', function(event) {
+            event.preventDefault();
+            const laneRole = $('#laneRole').val();
+            const heroId = $('#heroIdLane').val();
+
+            $.get(`/api/scenarios/laneRoles?lane_role=${laneRole}&hero_id=${heroId}`, (data) => {
+                if (data && data.length > 0) {
+                    const resultsHtml = data.map(result => `
+                        <div>
+                            <p><strong>Hero ID:</strong> ${result.hero_id}</p>
+                            <p><strong>Lane Role:</strong> ${result.lane_role}</p>
+                            <p><strong>Time:</strong> ${result.time}</p>
+                            <p><strong>Games:</strong> ${result.games}</p>
+                            <p><strong>Wins:</strong> ${result.wins}</p>
+                        </div>
+                    `).join('');
+                    $('#laneResults').html(resultsHtml);
+                } else {
+                    $('#laneResults').html('<div class="alert alert-warning">No data found for the specified lane roles.</div>');
+                }
+            }).fail(() => {
+                $('#laneResults').html('<div class="alert alert-danger">Failed to fetch lane roles data.</div>');
+            });
+        });
+
+        // Handle misc scenarios form submission
+        $('#miscForm').on('submit', function(event) {
+            event.preventDefault();
+            const scenario = $('#scenario').val();
+
+            $.get(`/api/scenarios/misc?scenario=${scenario}`, (data) => {
+                if (data && data.length > 0) {
+                    const resultsHtml = data.map(result => `
+                        <div>
+                            <p><strong>Scenario:</strong> ${scenario}</p>
+                            <p><strong>Games:</strong> ${result.games}</p>
+                            <p><strong>Wins:</strong> ${result.wins}</p>
+                        </div>
+                    `).join('');
+                    $('#miscResults').html(resultsHtml);
+                } else {
+                    $('#miscResults').html('<div class="alert alert-warning">No data found for the specified scenario.</div>');
+                }
+            }).fail(() => {
+                $('#miscResults').html('<div class="alert alert-danger">Failed to fetch misc scenarios data.</div>');
+            });
+        });
+    });
+</script>
+</body>
+</html>
