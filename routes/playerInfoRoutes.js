@@ -91,6 +91,29 @@ router.get('/counts', async (req, res) => {
     }
 });
 
+// @route    GET api/playerinfo/search
+// @desc     Search players by personaname
+// @access   Public
+router.get('/search', async (req, res) => {
+    const { q } = req.query;
+
+    if (!q) {
+        return res.status(400).json({ msg: 'Search query (q) is required' });
+    }
+
+    try {
+        const response = await axios.get(`https://api.opendota.com/api/search`, {
+            params: { q }
+        });
+
+        res.json(response.data);
+    } catch (err) {
+        console.error('Error searching players:', err.response ? err.response.data : err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+
 // @route    GET api/playerinfo/histograms
 // @desc     Get player histograms by account ID and field
 // @access   Public
