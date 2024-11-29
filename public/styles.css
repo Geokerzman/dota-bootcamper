@@ -1,13 +1,14 @@
 :root {
-    --gradient-right: rgba(248, 70, 180, 0.301);
-    --gradient-left: rgba(9, 243, 99, 0.247);
-    --gradient-background: #1b2838;
-    --gradient-background-right: rgba(70, 227, 248, 0);
-    --gradient-background-left: rgba(239, 243, 9, 0.13);
-    --btn-background: rgb(90, 40, 92);
-    --btn-background-hover: rgb(100, 50, 102);
-    --text-color: #8F98A0;
-    --font-family: "Motiva Sans", Arial, Helvetica, sans-serif;
+    --gradient-background: linear-gradient(120deg, #f83600, #f9d423);
+    --card-background: rgba(255, 255, 255, 0.1);
+    --btn-background: #f83600;
+    --btn-background-hover: #f9d423;
+    --text-color: #ffffff;
+    --heading-color: #ffffff;
+    --border-color: rgba(255, 255, 255, 0.2);
+    --font-family: 'Poppins', Arial, sans-serif;
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --shadow-dark: rgba(0, 0, 0, 0.3);
 }
 
 body {
@@ -19,92 +20,142 @@ body {
 }
 
 .container {
-    max-width: 952px;
-    margin-top: 40px;
-    padding: 20px;
-    background: radial-gradient(farthest-side at top right, var(--gradient-right), transparent 500px),
-    radial-gradient(farthest-corner at top left, var(--gradient-left), transparent 600px),
-    radial-gradient(farthest-corner at bottom right, var(--gradient-background-right), transparent 500px),
-    radial-gradient(farthest-corner at bottom left, var(--gradient-background-left), transparent 600px),
-    var(--gradient-background);
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    padding-bottom: 40px;
-}
-
-.card {
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 20px;
-    border-radius: 6px;
-}
-
-.card-header {
-    background: rgba(255, 255, 255, 0.05);
-    font-size: 18px;
-    font-weight: bold;
-    padding: 15px;
-}
-
-.card-body {
-    padding: 15px;
-    color: var(--text-color);
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 40px;
+    background: var(--card-background);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px var(--shadow-dark);
 }
 
 h1, h2, h3 {
-    color: #FFFFFF;
+    color: var(--heading-color);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-size: 2rem;
 }
 
-input.form-control {
-    background-color: #2a394f;
-    color: #FFFFFF;
-    border: 1px solid #394b59;
-    border-radius: 4px;
+.card {
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    padding: 20px;
+    backdrop-filter: blur(12px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-input.form-control:focus {
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px var(--shadow-dark);
+}
+
+.card-header {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--heading-color);
+}
+
+.card-body {
+    color: var(--text-color);
+}
+
+input.form-control, select.form-select {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input.form-control:focus, select.form-select:focus {
     outline: none;
-    border-color: var(--btn-background-hover);
-    box-shadow: 0 0 8px var(--btn-background-hover);
-}
-
-.btn-primary {
-    background-color: var(--btn-background);
     border-color: var(--btn-background);
-    font-size: 14px;
-    font-weight: bold;
+    box-shadow: 0 0 10px var(--btn-background);
 }
 
-.btn-primary:hover {
-    background-color: var(--btn-background-hover);
-    border-color: var(--btn-background-hover);
+button.btn {
+    background: var(--btn-background);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.profile-summary {
-    text-align: left;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #d1d1d1;
+button.btn:hover {
+    background: var(--btn-background-hover);
+    transform: scale(1.05);
 }
 
-.list-group-item {
-    background-color: #2a394f;
-    color: #FFFFFF;
+.rank-image {
+    width: 70px;
+    height: auto;
+    margin-left: 20px;
 }
 
-.list-group-item:first-child {
-    border-radius: 4px 4px 0 0;
-}
-
-.list-group-item:last-child {
-    border-radius: 0 0 4px 4px;
+.img-thumbnail {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 20px;
+    border: 2px solid var(--btn-background);
 }
 
 a {
-    color: #66c0f4;
+    color: var(--btn-background);
     text-decoration: none;
 }
 
 a:hover {
+    color: var(--btn-background-hover);
     text-decoration: underline;
+}
+
+.section-title {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: var(--heading-color);
+    margin-bottom: 20px;
+}
+
+/* Темный фон для элемента списка */
+.list-group-item {
+    background-color: #d53000; /* Темный оттенок #f83600 */
+    transition: background-color 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #c23000; /* Немного более темный оттенок для hover */
+}
+
+/* Стили для элемента списка */
+.list-group-item.d-flex {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.list-group-item .img-thumbnail {
+    border: 2px solid #f83600; /* Оставляем текущую границу */
+}
+
+.list-group-item .btn {
+    background-color: #f83600;
+    color: #000;
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    border: none;
+    margin-top: 10px;
 }
