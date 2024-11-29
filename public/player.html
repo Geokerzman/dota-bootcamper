@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dota 2 Player Info Viewer</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js -->
     <style>
         .rank-image {
             width: 50px;
@@ -18,13 +18,19 @@
             height: 50px;
             margin-right: 10px;
         }
+        .chart-container {
+            width: 100%;
+            height: 500px;
+            margin-top: 30px;
+        }
     </style>
 </head>
 <body>
+
 <div class="container mt-5">
     <h1 class="text-center mb-4">Dota 2 Player Info Viewer</h1>
 
-    <!-- Search Player by Name Section -->
+    <!-- Player Search Section -->
     <section class="card mb-4">
         <header class="card-header">
             <h2>Search Player</h2>
@@ -54,35 +60,23 @@
         </div>
     </section>
 
-    <!-- Advanced Stats Section -->
+    <!-- Last Match Stats Section -->
     <section class="card mb-4">
         <header class="card-header">
-            <h2>Advanced Player Stats</h2>
+            <h2>Last Match Stats</h2>
         </header>
         <div class="card-body">
-            <form id="advancedStatsForm" class="mb-3">
-                <input type="hidden" id="account_id_stats" required>
-                <label for="statType" class="form-label">Select Stat Type:</label>
-                <select id="statType" class="form-select mb-3">
-                    <option value="totals">Totals</option>
-                    <option value="counts">Counts</option>
-                    <option value="histograms">Histograms</option>
-                </select>
-                <label for="field" class="form-label">Field (only for Histograms):</label>
-                <input type="text" id="field" class="form-control mb-3" placeholder="Enter Field (e.g., kills)">
-                <button type="submit" class="btn btn-secondary w-100">Get Stats</button>
-            </form>
-            <div id="statsResults"></div>
+            <div id="lastMatchStats" class="chart-container">
+                <canvas id="statsChart"></canvas>
+            </div>
         </div>
     </section>
 </div>
 
-<!-- JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Search Player by Name Form Submission
+        // Search Player Form Submission
         $('#searchPlayerForm').on('submit', function(event) {
             event.preventDefault();
             const playerName = $('#player_name').val();
@@ -94,26 +88,25 @@
 
             // Fetch players by name
             $.ajax({
-                url: `/api/playerinfo/search?q=${playerName}`,
+                url: `https://api.opendota.com/api/search?q=${playerName}`, // OpenDota search API
                 method: 'GET',
                 success: function(data) {
                     if (data && data.length > 0) {
                         let resultHtml = `<h3>Search Results</h3><ul class="list-group">`;
                         data.forEach(player => {
                             resultHtml += `
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <img src="${player.avatarfull}" alt="Avatar" class="img-thumbnail">
-                                        <div>
-                                            <strong>${player.personaname || 'Unknown'}</strong>
-                                            <p>Account ID: ${player.account_id}</p>
-                                            <button class="btn btn-secondary btn-sm view-profile" data-account-id="${player.account_id}">
-                                                View Profile
-                                            </button>
-                                        </div>
-                                    </li>`;
+                                <li class="list-group-item d-flex align-items-center">
+                                    <img src="${player.avatarfull}" alt="Avatar" class="img-thumbnail">
+                                    <div>
+                                        <strong>${player.personaname || 'Unknown'}</strong>
+                                        <p>Account ID: ${player.account_id}</p>
+                                        <button class="btn btn-secondary btn-sm view-profile" data-account-id="${player.account_id}">
+                                            View Profile
+                                        </button>
+                                    </div>
+                                </li>`;
                         });
                         resultHtml += `</ul>`;
-
                         $('#searchResults').html(resultHtml);
 
                         // Attach event listeners to "View Profile" buttons
@@ -131,7 +124,6 @@
                 }
             });
         });
-
         // Player Info Form Submission
         $('#playerForm').on('submit', function(event) {
             event.preventDefault();
@@ -192,48 +184,110 @@
                 }
             });
         });
-
-        // Advanced Stats Form Submission
-        $('#advancedStatsForm').on('submit', function(event) {
+        // Player Info Form Submission
+        $('#playerForm').on('submit', function(event) {
             event.preventDefault();
-            const accountId = $('#account_id_stats').val();
-            const statType = $('#statType').val();
-            const field = $('#field').val();
+            const accountId = $('#account_id').val();
 
             if (!accountId) {
-                $('#statsResults').html('<div class="alert alert-danger">Please fetch player info first.</div>');
+                $('#playerResults').html('<div class="alert alert-danger">Please enter an Account ID.</div>');
                 return;
             }
 
-            if (statType === 'histograms' && !field) {
-                $('#statsResults').html('<div class="alert alert-danger">Please enter a field for histograms.</div>');
-                return;
-            }
+            // Fetch last match stats
+            fetchLastMatchStats(accountId);
+        });
 
-            let url = `/api/playerinfo/${statType}?account_id=${accountId}`;
-            if (statType === 'histograms') {
-                url += `&field=${field}`;
-            }
-
-            // Fetch advanced stats
+        // Fetch and display last match stats
+        function fetchLastMatchStats(accountId) {
             $.ajax({
-                url: url,
+                url: `https://api.opendota.com/api/players/${accountId}/matches?limit=1`, // Fetch last match
                 method: 'GET',
                 success: function(data) {
-                    if (data) {
-                        $('#statsResults').html(`
-                                <h3>${statType.charAt(0).toUpperCase() + statType.slice(1)} Stats</h3>
-                                <pre>${JSON.stringify(data, null, 2)}</pre>
-                            `);
+                    if (data && data.length > 0) {
+                        const match = data[0];
+                        const stats = {
+                            kills: match.kills || 0,
+                            deaths: match.deaths || 0,
+                            assists: match.assists || 0,
+                            gold_per_min: match.gold_per_min || 0,
+                            xp_per_min: match.xp_per_min || 0,
+                            hero_id: match.hero_id,
+                            game_mode: match.game_mode,
+                            duration: match.duration,
+                            radiant_win: match.radiant_win,
+                            player_slot: match.player_slot
+                        };
+
+                        // Check win/loss
+                        const isWin = (stats.player_slot < 128 && stats.radiant_win) ||
+                            (stats.player_slot >= 128 && !stats.radiant_win);
+                        const resultText = isWin ? "Victory" : "Defeat";
+
+                        // Format game mode and duration
+                        const gameModes = {
+                            22: "All Pick", // Example
+                            1: "Captains Mode",
+                            3: "Random Draft",
+                            // Add more modes as needed
+                        };
+                        const gameMode = gameModes[stats.game_mode] || "Unknown Mode";
+
+                        const durationMinutes = Math.floor(stats.duration / 60);
+                        const durationSeconds = stats.duration % 60;
+
+                        // Chart.js
+                        const ctx = document.getElementById('statsChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'radar',
+                            data: {
+                                labels: ['Kills', 'Deaths', 'Assists', 'Gold per Min', 'XP per Min'],
+                                datasets: [{
+                                    label: 'Last Match Stats',
+                                    data: [stats.kills, stats.deaths, stats.assists, stats.gold_per_min, stats.xp_per_min],
+                                    backgroundColor: 'rgba(235,87,54,0.2)',
+                                    borderColor: 'rgb(235,151,54)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: 'rgb(192,75,75)'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: `Hero: ${stats.hero_id}, Mode: ${gameMode}, Duration: ${durationMinutes}m ${durationSeconds}s`
+                                    },
+                                    subtitle: {
+                                        display: true,
+                                        text: `Result: ${resultText}`,
+                                        color: isWin ? 'green' : 'red',
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    r: {
+                                        angleLines: {
+                                            color: 'rgba(255, 99, 132, 0.2)'
+                                        },
+                                        suggestedMin: 0,
+                                        suggestedMax: Math.max(stats.kills, stats.deaths, stats.assists, stats.gold_per_min, stats.xp_per_min) * 1.2
+                                    }
+                                }
+                            }
+                        });
                     } else {
-                        $('#statsResults').html('<div class="alert alert-warning">No stats data found.</div>');
+                        $('#lastMatchStats').html('<div class="alert alert-warning">No match data found.</div>');
                     }
                 },
                 error: function() {
-                    $('#statsResults').html('<div class="alert alert-danger">Error fetching stats data.</div>');
+                    $('#lastMatchStats').html('<div class="alert alert-danger">Error fetching last match stats.</div>');
                 }
             });
-        });
+        }
     });
 </script>
 </body>
