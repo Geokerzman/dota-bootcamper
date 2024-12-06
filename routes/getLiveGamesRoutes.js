@@ -2,100 +2,78 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
-// Base URL для OpenDota API
 const OPEN_DOTA_API_BASE_URL = 'https://api.opendota.com/api';
 
 /**
  * @route GET /api/live
- * @desc  Get a list of live games
+ * @desc  Get detailed information about 10 random live matches
  * @access Public
  */
-router.get('/live', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
+        console.log('Fetching live matches from OpenDota API...');
+
+        // Получаем все текущие матчи
         const response = await axios.get(`${OPEN_DOTA_API_BASE_URL}/live`);
-        if (!Array.isArray(response.data)) {
-            return res.status(500).json({ error: 'Unexpected response format from OpenDota API' });
+        const liveMatches = response.data;
+
+        console.log(`Total live matches fetched: ${liveMatches.length}`);
+
+        if (!Array.isArray(liveMatches) || liveMatches.length === 0) {
+            console.warn('No live matches found.');
+            return res.status(404).json({ error: 'No live matches found' });
         }
 
-        const liveGames = response.data.map(liveMatch => ({
-            match_id: liveMatch.match_id,
-            league_id: liveMatch.league_id,
-            league_name: liveMatch.league_name,
-            spectators: liveMatch.spectators,
-            radiant_team: liveMatch.radiant_team,
-            dire_team: liveMatch.dire_team,
-            scoreboard: liveMatch.scoreboard
+        // Выбираем случайные 10 матчей
+        const shuffledMatches = liveMatches.sort(() => 0.5 - Math.random());
+        const randomMatches = shuffledMatches.slice(0, 10);
+
+        console.log(`Random matches selected: ${randomMatches.map(match => match.match_id).join(', ')}`);
+
+        // Форматируем данные для каждого матча
+        const matchDetails = await Promise.all(randomMatches.map(async (match) => {
+            console.log(`Processing match: ${match.match_id}`);
+
+            // Получаем информацию о игроках для каждого матча
+            const playerDetails = await Promise.all(match.players.map(async (player) => {
+                const playerResponse = await axios.get(`${OPEN_DOTA_API_BASE_URL}/players/${player.account_id}`);
+                const playerData = playerResponse.data;
+
+                // Получаем информацию о герое
+                const heroResponse = await axios.get(`${OPEN_DOTA_API_BASE_URL}/heroes`);
+                const hero = heroResponse.data.find(h => h.id === player.hero_id);
+
+                return {
+                    account_id: player.account_id,
+                    name: player.name || 'Unknown',
+                    rank: playerData.rank_tier || 'Unranked',  // Ранг игрока
+                    hero_name: hero ? hero.localized_name : 'Unknown Hero',
+                    hero_id: player.hero_id || null,
+                    team: player.team === 0 ? 'Radiant' : 'Dire',
+                    kills: player.kills || 0,
+                    deaths: player.deaths || 0,
+                    assists: player.assists || 0,
+                    is_pro: player.is_pro || false,
+                    team_name: player.team_name || 'N/A'
+                };
+            }));
+
+            return {
+                match_id: match.match_id,
+                spectators: match.spectators || 0,
+                radiant_team: match.team_name_radiant || 'Unknown',
+                dire_team: match.team_name_dire || 'Unknown',
+                radiant_score: match.radiant_score || 0,
+                dire_score: match.dire_score || 0,
+                players: playerDetails
+            };
         }));
 
-        res.json(liveGames);
+        console.log('Returning formatted match details...');
+        res.json(matchDetails);
     } catch (err) {
-        console.error('Error fetching live games:', err.message);
-        res.status(500).json({ error: 'Failed to fetch live games' });
-    }
-});
-
-/**
- * @route GET /api/scenarios/itemTimings
- * @desc  Get win rates for certain item timings
- * @access Public
- * @query item (string) - Filter by item name
- * @query hero_id (integer) - Filter by hero ID
- */
-router.get('/scenarios/itemTimings', async (req, res) => {
-    const { item, hero_id } = req.query;
-
-    try {
-        const response = await axios.get(`${OPEN_DOTA_API_BASE_URL}/scenarios/itemTimings`, {
-            params: { item, hero_id }
-        });
-
-        res.json(response.data);
-    } catch (err) {
-        console.error('Error fetching item timings:', err.message);
-        res.status(500).json({ error: 'Failed to fetch item timings' });
-    }
-});
-
-/**
- * @route GET /api/scenarios/laneRoles
- * @desc  Get win rates for heroes in certain lane roles
- * @access Public
- * @query lane_role (string) - Filter by lane role (1-4)
- * @query hero_id (integer) - Filter by hero ID
- */
-router.get('/scenarios/laneRoles', async (req, res) => {
-    const { lane_role, hero_id } = req.query;
-
-    try {
-        const response = await axios.get(`${OPEN_DOTA_API_BASE_URL}/scenarios/laneRoles`, {
-            params: { lane_role, hero_id }
-        });
-
-        res.json(response.data);
-    } catch (err) {
-        console.error('Error fetching lane roles:', err.message);
-        res.status(500).json({ error: 'Failed to fetch lane roles' });
-    }
-});
-
-/**
- * @route GET /api/scenarios/misc
- * @desc  Get miscellaneous team scenarios
- * @access Public
- * @query scenario (string) - Name of the scenario
- */
-router.get('/scenarios/misc', async (req, res) => {
-    const { scenario } = req.query;
-
-    try {
-        const response = await axios.get(`${OPEN_DOTA_API_BASE_URL}/scenarios/misc`, {
-            params: { scenario }
-        });
-
-        res.json(response.data);
-    } catch (err) {
-        console.error('Error fetching miscellaneous scenarios:', err.message);
-        res.status(500).json({ error: 'Failed to fetch miscellaneous scenarios' });
+        console.error('Error fetching live matches:', err.message);
+        res.status(500).json({ error: 'Failed to fetch matches' });
     }
 });
 
