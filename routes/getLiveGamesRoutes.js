@@ -4,7 +4,6 @@ const router = express.Router();
 
 const OPEN_DOTA_API_BASE_URL = 'https://api.opendota.com/api';
 
-// Кэш для героев и игроков
 let heroCache = null;
 const playerCache = {};
 
@@ -64,27 +63,34 @@ router.get('/', async (req, res) => {
 
         // Обрабатываем данные для каждого матча
         const matchDetails = await Promise.all(randomMatches.map(async (match) => {
-            // Отбираем только первых 5 игроков каждой команды
-            const players = await Promise.all(
-                match.players.slice(0, 5).map(async (player) => {
-                    const hero = heroes.find(h => h.id === player.hero_id);
-                    const profile = await getPlayerProfile(player.account_id); // Получаем профиль игрока
+            // Разделяем игроков на команды и ограничиваем до 5 игроков для каждой
+            const radiantPlayers = match.players
+                .filter(player => player.team === 0) // Radiant
+                .slice(0, 5); // Ограничиваем до 5 игроков
 
-                    return {
-                        account_id: player.account_id || null,
-                        name: player.name || 'Anonymous',
-                        hero_name: hero ? hero.localized_name : 'Unknown Hero',
-                        hero_id: player.hero_id || null,
-                        team: player.team === 0 ? 'Radiant' : 'Dire',
-                        kills: player.kills || 0,
-                        deaths: player.deaths || 0,
-                        assists: player.assists || 0,
-                        is_pro: player.is_pro || false,
-                        team_name: player.team_name || 'N/A',
-                        avatar: profile ? profile.avatarfull : 'https://example.com/default-avatar.png',
-                    };
-                })
-            );
+            const direPlayers = match.players
+                .filter(player => player.team === 1) // Dire
+                .slice(0, 5); // Ограничиваем до 5 игроков
+
+            // Обрабатываем игроков обеих команд
+            const players = await Promise.all([...radiantPlayers, ...direPlayers].map(async (player) => {
+                const hero = heroes.find(h => h.id === player.hero_id);
+                const profile = await getPlayerProfile(player.account_id); // Получаем профиль игрока
+
+                return {
+                    account_id: player.account_id || null,
+                    name: player.name || 'Anonymous',
+                    hero_name: hero ? hero.localized_name : 'Unknown Hero',
+                    hero_id: player.hero_id || null,
+                    team: player.team === 0 ? 'Radiant' : 'Dire',
+                    kills: player.kills != null ? player.kills : 0, // Убедимся, что null значения заменяются на 0
+                    deaths: player.deaths != null ? player.deaths : 0,
+                    assists: player.assists != null ? player.assists : 0,
+                    is_pro: player.is_pro || false,
+                    team_name: player.team_name || 'N/A',
+                    avatar: profile ? profile.avatarfull : 'https://example.com/default-avatar.png',
+                };
+            }));
 
             return {
                 match_id: match.match_id,
