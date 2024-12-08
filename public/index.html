@@ -6,75 +6,10 @@
     <title>Live Match Details</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            color: #343a40;
-        }
-        .match-container {
-            background-color: #ffffff;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        .match-container:hover {
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-        }
-        .team-name {
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-        .team-score {
-            font-size: 1.5rem;
-        }
-        .radiant {
-            color: #43a047;
-        }
-        .dire {
-            color: #c62828;
-        }
-        .match-header {
-            margin-bottom: 20px;
-        }
-        table {
-            width: 100%;
-            margin-top: 10px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f1f1f1;
-        }
-        .player-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        .text-center {
-            text-align: center;
-        }
-        @media (max-width: 768px) {
-            .match-container {
-                padding: 15px;
-            }
-            .match-header h3 {
-                font-size: 1.5rem;
-            }
-            .team-score {
-                font-size: 1.2rem;
-            }
-        }
-    </style>
 </head>
-<body>
+<body class="bg-light text-dark">
 <div class="container mt-5">
     <h1 class="text-center mb-4">Live Match Details</h1>
     <div id="matches-container"></div>
@@ -93,26 +28,26 @@
 
             matches.forEach(match => {
                 const matchElement = document.createElement('div');
-                matchElement.classList.add('match-container');
+                matchElement.classList.add('card', 'mb-4', 'shadow-sm');
 
                 const radiantPlayers = match.players.filter(player => player.team === 'Radiant');
                 const direPlayers = match.players.filter(player => player.team === 'Dire');
 
                 matchElement.innerHTML = `
-                    <div class="match-header">
-                        <h3>Match ID: ${match.match_id}</h3>
-                        <p><strong>League:</strong> ${match.league_name || 'Unknown'}</p>
+                    <div class="card-body">
+                        <h3 class="card-title">Match ID: ${match.match_id}</h3>
+                        <p><strong>League:</strong> ${match.league_name || 'Regular Match'}</p>
                         <p><strong>Spectators:</strong> ${match.spectators}</p>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="radiant">
-                            <span class="team-name">${match.radiant_team}</span>
-                            <span class="team-score">(${match.radiant_score})</span>
+                    <div class="d-flex justify-content-between align-items-center p-3">
+                        <div class="text-success">
+                            <span class="font-weight-bold">${match.radiant_team}</span>
+                            <span class="h4">(${match.radiant_score})</span>
                         </div>
                         <span>VS</span>
-                        <div class="dire">
-                            <span class="team-name">${match.dire_team}</span>
-                            <span class="team-score">(${match.dire_score})</span>
+                        <div class="text-danger">
+                            <span class="font-weight-bold">${match.dire_team}</span>
+                            <span class="h4">(${match.dire_score})</span>
                         </div>
                     </div>
                     <h4 class="mt-4">Radiant Players</h4>
@@ -131,7 +66,7 @@
                         <tbody>
                             ${radiantPlayers.map(player => `
                                 <tr>
-                                    <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="player-avatar" /></td>
+                                    <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="rounded-circle" width="40" height="40" /></td>
                                     <td>${player.name || 'Unknown'}</td>
                                     <td>${player.rank || 'Unranked'}</td>
                                     <td>${player.hero_name || 'Unknown Hero'}</td>
@@ -158,7 +93,7 @@
                         <tbody>
                             ${direPlayers.map(player => `
                                 <tr>
-                                    <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="player-avatar" /></td>
+                                    <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="rounded-circle" width="40" height="40" /></td>
                                     <td>${player.name || 'Unknown'}</td>
                                     <td>${player.rank || 'Unranked'}</td>
                                     <td>${player.hero_name || 'Unknown Hero'}</td>
