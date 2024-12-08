@@ -45,10 +45,10 @@ router.get('/', async (req, res) => {
 
                 return {
                     account_id: player.account_id,
-                    name: player.name || 'Unknown',
+                    name: player.name || 'Anonymous',
                     rank: playerData.rank_tier || 'Unranked',  // Ранг игрока
                     hero_name: hero ? hero.localized_name : 'Unknown Hero',
-                    hero_id: player.hero_id || null,
+                    hero_id: player.hero_id || 'Not picked',
                     team: player.team === 0 ? 'Radiant' : 'Dire',
                     kills: player.kills || 0,
                     deaths: player.deaths || 0,
@@ -61,8 +61,8 @@ router.get('/', async (req, res) => {
             return {
                 match_id: match.match_id,
                 spectators: match.spectators || 0,
-                radiant_team: match.team_name_radiant || 'Unknown',
-                dire_team: match.team_name_dire || 'Unknown',
+                radiant_team: match.team_name_radiant || 'Team Radiant',
+                dire_team: match.team_name_dire || 'Team Dire',
                 radiant_score: match.radiant_score || 0,
                 dire_score: match.dire_score || 0,
                 players: playerDetails
