@@ -25,7 +25,7 @@ async function getPlayerProfile(accountId) {
     try {
         console.log(`Fetching profile for player: ${accountId}`);
         const response = await axios.get(`${OPEN_DOTA_API_BASE_URL}/players/${accountId}`);
-        const profile = response.data.profile;
+        const profile = response.data;
         playerCache[accountId] = profile; // Кэшируем профиль игрока
         return profile;
     } catch (err) {
@@ -77,10 +77,16 @@ router.get('/', async (req, res) => {
                 const hero = heroes.find(h => h.id === player.hero_id);
                 const profile = await getPlayerProfile(player.account_id); // Получаем профиль игрока
 
+                // Получаем ранг из профиля, если доступен
+                const rank = profile ? profile.rank_tier : null;
+                const formattedRank = rank
+                    ? `${Math.floor(rank / 10)}.${rank % 10}` // Форматируем ранг (например, 54 -> "5.4")
+                    : 'Unranked'; // Если ранга нет, указываем "Unranked"
+
                 return {
                     account_id: player.account_id || null,
                     name: player.name || 'Anonymous',
-                    hero_name: hero ? hero.localized_name : 'Unknown Hero',
+                    hero_name: hero ? hero.localized_name : 'Hero not selected',
                     hero_id: player.hero_id || null,
                     team: player.team === 0 ? 'Radiant' : 'Dire',
                     kills: player.kills != null ? player.kills : 0, // Убедимся, что null значения заменяются на 0
@@ -88,15 +94,16 @@ router.get('/', async (req, res) => {
                     assists: player.assists != null ? player.assists : 0,
                     is_pro: player.is_pro || false,
                     team_name: player.team_name || 'N/A',
-                    avatar: profile ? profile.avatarfull : 'https://example.com/default-avatar.png',
+                    avatar: profile && profile.profile ? profile.profile.avatarfull : 'https://example.com/default-avatar.png',
+                    rank: formattedRank, // Добавляем форматированный ранг
                 };
             }));
 
             return {
                 match_id: match.match_id,
                 spectators: match.spectators || 0,
-                radiant_team: match.team_name_radiant || 'Unknown',
-                dire_team: match.team_name_dire || 'Unknown',
+                radiant_team: match.team_name_radiant || 'Radiant',
+                dire_team: match.team_name_dire || 'Dire',
                 radiant_score: match.radiant_score || 0,
                 dire_score: match.dire_score || 0,
                 players
