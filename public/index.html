@@ -1,75 +1,183 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dota 2 Data Viewer</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <title>Live Match Details</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .match-container {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .match-container:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        .team-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .team-score {
+            font-size: 1.5rem;
+        }
+        .radiant {
+            color: #43a047;
+        }
+        .dire {
+            color: #c62828;
+        }
+        .match-header {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f1f1;
+        }
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .match-container {
+                padding: 15px;
+            }
+            .match-header h3 {
+                font-size: 1.5rem;
+            }
+            .team-score {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Dota 2 Data Viewer</h1>
-
-    <!-- Match Data Section -->
-    <div class="card">
-        <div class="card-header">
-            <h2>Match Data</h2>
-        </div>
-        <div class="card-body">
-            <form id="matchForm" class="mb-3">
-                <label for="match_id" class="form-label">Enter Match ID:</label>
-                <input type="text" id="match_id" class="form-control mb-3" placeholder="Enter Match ID" required>
-                <button type="submit" class="btn btn-primary w-100">Get Match Data</button>
-            </form>
-            <div id="results"></div>
-        </div>
-    </div>
+    <h1 class="text-center mb-4">Live Match Details</h1>
+    <div id="matches-container"></div>
 </div>
 
-<!-- Bootstrap JS Bundle (includes Popper) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Match Data Fetch
-    $(document).ready(function() {
-        $('#matchForm').on('submit', function(event) {
-            event.preventDefault();
-            const matchId = $('#match_id').val();
+    axios.get('/api/live')
+        .then(response => {
+            const matches = response.data;
+            const container = document.getElementById('matches-container');
 
-            if (!matchId) {
-                $('#results').html('<div class="alert alert-danger">Please enter a Match ID.</div>');
+            if (matches.length === 0) {
+                container.innerHTML = '<p class="text-center">No live matches available.</p>';
                 return;
             }
 
-            $.ajax({
-                url: `/api/match/${matchId}`,
-                method: 'GET',
-                success: function(data) {
-                    if (data && data.players) {
-                        let resultHtml = '<ul class="list-group">';
-                        data.players.forEach(player => {
-                            resultHtml += `
-                                    <li class="list-group-item">
-                                        <strong>${player.player_name}</strong><br>
-                                        <span>Hero ID: ${player.hero_id}</span><br>
-                                        <span>Kills: ${player.kills}, Deaths: ${player.deaths}, Assists: ${player.assists}</span><br>
-                                    </li>
-                                `;
-                        });
-                        resultHtml += '</ul>';
-                        $('#results').html(resultHtml);
-                    } else {
-                        $('#results').html('<div class="alert alert-warning">No match data found.</div>');
-                    }
-                },
-                error: function() {
-                    $('#results').html('<div class="alert alert-danger">Error fetching match data.</div>');
-                }
+            matches.forEach(match => {
+                const matchElement = document.createElement('div');
+                matchElement.classList.add('match-container');
+
+                const radiantPlayers = match.players.filter(player => player.team === 'Radiant');
+                const direPlayers = match.players.filter(player => player.team === 'Dire');
+
+                matchElement.innerHTML = `
+                    <div class="match-header">
+                        <h3>Match ID: ${match.match_id}</h3>
+                        <p><strong>League:</strong> ${match.league_name || 'Unknown'}</p>
+                        <p><strong>Spectators:</strong> ${match.spectators}</p>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="radiant">
+                            <span class="team-name">${match.radiant_team}</span>
+                            <span class="team-score">(${match.radiant_score})</span>
+                        </div>
+                        <span>VS</span>
+                        <div class="dire">
+                            <span class="team-name">${match.dire_team}</span>
+                            <span class="team-score">(${match.dire_score})</span>
+                        </div>
+                    </div>
+                    <h4 class="mt-4">Radiant Players</h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Avatar</th>
+                                <th>Player Name</th>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Kills</th>
+                                <th>Deaths</th>
+                                <th>Assists</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${radiantPlayers.map(player => `
+                                <tr>
+                                    <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="player-avatar" /></td>
+                                    <td>${player.name || 'Unknown'}</td>
+                                    <td>${player.rank || 'Unranked'}</td>
+                                    <td>${player.hero_name || 'Unknown Hero'}</td>
+                                    <td>${player.kills || 0}</td>
+                                    <td>${player.deaths || 0}</td>
+                                    <td>${player.assists || 0}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <h4 class="mt-4">Dire Players</h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Avatar</th>
+                                <th>Player Name</th>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Kills</th>
+                                <th>Deaths</th>
+                                <th>Assists</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${direPlayers.map(player => `
+                                <tr>
+                                    <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="player-avatar" /></td>
+                                    <td>${player.name || 'Unknown'}</td>
+                                    <td>${player.rank || 'Unranked'}</td>
+                                    <td>${player.hero_name || 'Unknown Hero'}</td>
+                                    <td>${player.kills || 0}</td>
+                                    <td>${player.deaths || 0}</td>
+                                    <td>${player.assists || 0}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                container.appendChild(matchElement);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching matches:', error);
+            document.getElementById('matches-container').innerHTML = '<p class="text-center text-danger">Error loading matches.</p>';
         });
-    });
 </script>
+
 </body>
 </html>
