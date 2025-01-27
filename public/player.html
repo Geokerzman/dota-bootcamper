@@ -13,43 +13,53 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Dota 2 Player Info Viewer</h1>
 
-    <!-- Player Search Section -->
-    <section class="card mb-4 bg-light border">
-        <header class="card-header bg-secondary text-white">
-            <h2>Search Player</h2>
-        </header>
-        <div class="card-body">
-            <form id="searchPlayerForm" class="mb-3">
-                <label for="player_name" class="form-label">Enter Player Name:</label>
-                <input type="text" id="player_name" class="form-control mb-3" placeholder="Enter Player Name" required>
-                <button type="submit" class="btn btn-primary w-100">Search Player</button>
-            </form>
-            <div id="searchResults"></div>
-        </div>
-    </section>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2>Search Player</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="searchPlayerForm">
+                            <div class="form-group">
+                                <label for="player_name">Enter Player Name:</label>
+                                <input type="text" id="player_name" class="form-control" placeholder="Enter Player Name" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Search Player</button>
+                        </form>
+                        <div id="searchResults"></div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Player Info Section -->
-    <section class="card mb-4 bg-light border">
-        <header class="card-header bg-secondary text-white">
-            <h2>Player Info</h2>
-        </header>
-        <div class="card-body">
-            <form id="playerForm" class="mb-3">
-                <label for="account_id" class="form-label">Enter Account ID:</label>
-                <input type="text" id="account_id" class="form-control mb-3" placeholder="Enter Player Account ID" required>
-                <button type="submit" class="btn btn-primary w-100">Get Player Info</button>
-            </form>
-            <div id="playerResults"></div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2>Player Info</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="playerForm">
+                            <div class="form-group">
+                                <label for="account_id">Enter Account ID:</label>
+                                <input type="text" id="account_id" class="form-control" placeholder="Enter Player Account ID" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Get Player Info</button>
+                        </form>
+                        <div id="playerResults"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
 
     <!-- Last Match Stats Section -->
-    <section class="card mb-4 bg-light border">
-        <header class="card-header bg-secondary text-white">
+    <section class="card mb-4 player-card border">
+        <header class="card-header player-card bg-secondary text-white">
             <h2>Last Match Stats</h2>
         </header>
-        <div class="card-body">
-            <div id="lastMatchStats" class="chart-container">
+        <div class="card-body player-card">
+            <div  id="lastMatchStats" class="chart-container player-card">
                 <canvas id="statsChart"></canvas>
             </div>
         </div>
@@ -228,10 +238,10 @@
                                 datasets: [{
                                     label: 'Last Match Stats',
                                     data: [stats.kills, stats.deaths, stats.assists, stats.gold_per_min, stats.xp_per_min],
-                                    backgroundColor: 'rgba(235,87,54,0.2)',
+                                    backgroundColor: 'rgba(52,45,83,0.9)',
                                     borderColor: 'rgb(235,151,54)',
                                     borderWidth: 2,
-                                    pointBackgroundColor: 'rgb(192,75,75)'
+                                    pointBackgroundColor: 'rgb(35,27,50)'
                                 }]
                             },
                             options: {
@@ -254,7 +264,7 @@
                                 scales: {
                                     r: {
                                         angleLines: {
-                                            color: 'rgba(255, 99, 132, 0.2)'
+                                            color: 'rgba(82,71,129,0.9)'
                                         },
                                         suggestedMin: 0,
                                         suggestedMax: Math.max(stats.kills, stats.deaths, stats.assists, stats.gold_per_min, stats.xp_per_min) * 1.2
