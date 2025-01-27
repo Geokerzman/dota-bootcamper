@@ -67,6 +67,7 @@ h1, h2, h3 {
 
 .card-body {
     color: var(--text-color);
+    background: var(--card-background);
 }
 
 input.form-control, select.form-select {
@@ -216,4 +217,16 @@ th{
 }
 .list-group-item {
     border: none;
+}
+
+.section-container {
+    background: var(--card-background);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.search-section, .info-section {
+    margin-bottom: 40px;
 }
