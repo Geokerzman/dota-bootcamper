@@ -7,23 +7,6 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js -->
-    <style>
-        .rank-image {
-            width: 50px;
-            height: auto;
-            margin-left: 10px;
-        }
-        .img-thumbnail {
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
-        }
-        .chart-container {
-            width: 100%;
-            height: 500px;
-            margin-top: 30px;
-        }
-    </style>
 </head>
 <body>
 
@@ -31,8 +14,8 @@
     <h1 class="text-center mb-4">Dota 2 Player Info Viewer</h1>
 
     <!-- Player Search Section -->
-    <section class="card mb-4">
-        <header class="card-header">
+    <section class="card mb-4 bg-light border">
+        <header class="card-header bg-secondary text-white">
             <h2>Search Player</h2>
         </header>
         <div class="card-body">
@@ -46,8 +29,8 @@
     </section>
 
     <!-- Player Info Section -->
-    <section class="card mb-4">
-        <header class="card-header">
+    <section class="card mb-4 bg-light border">
+        <header class="card-header bg-secondary text-white">
             <h2>Player Info</h2>
         </header>
         <div class="card-body">
@@ -61,8 +44,8 @@
     </section>
 
     <!-- Last Match Stats Section -->
-    <section class="card mb-4">
-        <header class="card-header">
+    <section class="card mb-4 bg-light border">
+        <header class="card-header bg-secondary text-white">
             <h2>Last Match Stats</h2>
         </header>
         <div class="card-body">
@@ -124,6 +107,7 @@
                 }
             });
         });
+
         // Player Info Form Submission
         $('#playerForm').on('submit', function(event) {
             event.preventDefault();
@@ -157,8 +141,6 @@
                         const rankDivision = rankTier % 10;
                         const rankName = rankNames[Math.floor(rankTier / 10)] || "Unranked";
                         const rankImage = rankName !== "Unranked"
-                            // TODO GATHER ALL DIVISIONS
-                            // ? `/ranks/${rankName}${rankDivision}.png`
                             ? `/ranks/${rankName}.png`
                             : `/ranks/Unranked.png`;
 
@@ -184,6 +166,7 @@
                 }
             });
         });
+
         // Player Info Form Submission
         $('#playerForm').on('submit', function(event) {
             event.preventDefault();
