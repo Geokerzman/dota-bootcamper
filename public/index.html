@@ -16,8 +16,9 @@
 </div>
 
 <script>
+
     axios.get('/api/live')
-        .then(response => {
+        .then(async (response) => {
             const matches = response.data;
             const container = document.getElementById('matches-container');
 
@@ -26,87 +27,129 @@
                 return;
             }
 
-            matches.forEach(match => {
+            for (const match of matches) {
+                const radiantPlayers = [];
+                const direPlayers = [];
+
+                for (const player of match.players) {
+                    // Загружаем данные профиля для каждого игрока
+                    const profileResponse = await axios.get(`/api/playerinfo?account_id=${player.account_id}`);
+                    const profileData = profileResponse.data[0];
+
+                    // Добавляем информацию о ранге
+                    const rankTier = profileData.rank_tier || "unknown";
+                    const rankNames = {
+                        "1": "Herald",
+                        "2": "Guardian",
+                        "3": "Crusader",
+                        "4": "Archon",
+                        "5": "Legend",
+                        "6": "Ancient",
+                        "7": "Divine",
+                        "8": "Immortal"
+                    };
+                    const rankDivision = rankTier % 10;
+                    const rankName = rankNames[Math.floor(rankTier / 10)] || "Unranked";
+
+                    player.rank_name = rankName; // Сохраняем в player
+                    player.rank_image = rankName !== "Unranked"
+                        ? `/ranks/${rankName}.png`
+                        : `/ranks/Unranked.png`;
+
+                    if (player.team === 'Radiant') {
+                        radiantPlayers.push(player);
+                    } else if (player.team === 'Dire') {
+                        direPlayers.push(player);
+                    }
+                }
+
+                const radiantKills = radiantPlayers.reduce((sum, player) => sum + (player.kills || 0), 0);
+                const direKills = direPlayers.reduce((sum, player) => sum + (player.kills || 0), 0);
+
+
+                // Генерация карточек матчей
                 const matchElement = document.createElement('div');
                 matchElement.classList.add('card', 'mb-4', 'shadow-sm');
-
-                const radiantPlayers = match.players.filter(player => player.team === 'Radiant');
-                const direPlayers = match.players.filter(player => player.team === 'Dire');
-
                 matchElement.innerHTML = `
-                    <div class="card-body">
-                        <h3 class="card-title">Match ID: ${match.match_id}</h3>
-                        <p><strong>League:</strong> ${match.league_name || 'Regular Match'}</p>
-                        <p><strong>Spectators:</strong> ${match.spectators}</p>
+                <div class="card-body">
+                    <h3 class="card-title">Match ID: ${match.match_id}</h3>
+                    <p><strong>League:</strong> ${match.league_name || 'Regular Match'}</p>
+                    <p><strong>Spectators:</strong> ${match.spectators}</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center p-3">
+                    <div class="text-success">
+                        <span class="font-weight-bold">${match.radiant_team}</span>
+                        <span class="h4">(${match.radiant_score})</span>
+                        <p>Total Kills: <strong>${radiantKills}</strong></p>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center p-3">
-                        <div class="text-success">
-                            <span class="font-weight-bold">${match.radiant_team}</span>
-                            <span class="h4">(${match.radiant_score})</span>
-                        </div>
-                        <span>VS</span>
-                        <div class="text-danger">
-                            <span class="font-weight-bold">${match.dire_team}</span>
-                            <span class="h4">(${match.dire_score})</span>
-                        </div>
+                    <span>VS</span>
+                    <div class="text-danger">
+                        <span class="font-weight-bold">${match.dire_team}</span>
+                        <span class="h4">(${match.dire_score})</span>
+                        <p>Total Kills: <strong>${direKills}</strong></p>
                     </div>
-                    <h4 class="mt-4">Radiant Players</h4>
-                    <table class="table table-striped">
-                        <thead>
+                </div>
+                <h4 class="mt-4">Radiant Players</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Avatar</th>
+                            <th>Player Name</th>
+                            <th>Rank</th>
+                            <th>Hero</th>
+                            <th>Kills</th>
+                            <th>Deaths</th>
+                            <th>Assists</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${radiantPlayers.map(player => `
                             <tr>
-                                <th>Avatar</th>
-                                <th>Player Name</th>
-                                <th>Rank</th>
-                                <th>Hero</th>
-                                <th>Kills</th>
-                                <th>Deaths</th>
-                                <th>Assists</th>
+                                <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="rounded-circle" width="40" height="40" /></td>
+                                <td>${player.name || 'Unknown'}</td>
+                                <td>
+                                    <img src="${player.rank_image}" alt="${player.rank_name}" width="20" height="20" /> ${player.rank_name}
+                                </td>
+                                <td>${player.hero_name || 'Unknown Hero'}</td>
+                                <td>${player.kills || 0}</td>
+                                <td>${player.deaths || 0}</td>
+                                <td>${player.assists || 0}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${radiantPlayers.map(player => `
-                                <tr>
-                                    <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="rounded-circle" width="40" height="40" /></td>
-                                    <td>${player.name || 'Unknown'}</td>
-                                    <td>${player.rank || 'Unranked'}</td>
-                                    <td>${player.hero_name || 'Unknown Hero'}</td>
-                                    <td>${player.kills || 0}</td>
-                                    <td>${player.deaths || 0}</td>
-                                    <td>${player.assists || 0}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <h4 class="mt-4">Dire Players</h4>
-                    <table class="table table-striped">
-                        <thead>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <h4 class="mt-4">Dire Players</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Avatar</th>
+                            <th>Player Name</th>
+                            <th>Rank</th>
+                            <th>Hero</th>
+                            <th>Kills</th>
+                            <th>Deaths</th>
+                            <th>Assists</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${direPlayers.map(player => `
                             <tr>
-                                <th>Avatar</th>
-                                <th>Player Name</th>
-                                <th>Rank</th>
-                                <th>Hero</th>
-                                <th>Kills</th>
-                                <th>Deaths</th>
-                                <th>Assists</th>
+                                <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="rounded-circle" width="40" height="40" /></td>
+                                <td>${player.name || 'Unknown'}</td>
+                                <td>
+                                    <img src="${player.rank_image}" alt="${player.rank_name}" width="20" height="20" /> ${player.rank_name}
+                                </td>
+                                <td>${player.hero_name || 'Unknown Hero'}</td>
+                                <td>${player.kills || 0}</td>
+                                <td>${player.deaths || 0}</td>
+                                <td>${player.assists || 0}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${direPlayers.map(player => `
-                                <tr>
-                                    <td><img src="${player.avatar}" alt="${player.name}'s Avatar" class="rounded-circle" width="40" height="40" /></td>
-                                    <td>${player.name || 'Unknown'}</td>
-                                    <td>${player.rank || 'Unranked'}</td>
-                                    <td>${player.hero_name || 'Unknown Hero'}</td>
-                                    <td>${player.kills || 0}</td>
-                                    <td>${player.deaths || 0}</td>
-                                    <td>${player.assists || 0}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
                 container.appendChild(matchElement);
-            });
+            }
         })
         .catch(error => {
             console.error('Error fetching matches:', error);
