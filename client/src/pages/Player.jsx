@@ -143,75 +143,71 @@ export default function Player() {
   }
 
   return (
-    <div>
-      <h1 className="text-center mb-4">Dota 2 Player Info Viewer</h1>
-      <div className="row">
-        <div className="col-md-6">
-          <div className="card mb-4">
-            <div className="card-header"><h2>Search Player</h2></div>
-            <div className="card-body">
-              <form onSubmit={searchPlayers}>
-                <div className="form-group">
-                  <label>Enter Player Name:</label>
-                  <input className="form-control" value={playerName} onChange={e=>setPlayerName(e.target.value)} placeholder="Enter Player Name" />
-                </div>
-                <button type="submit" className="btn btn-primary">Search Player</button>
-              </form>
-              <div className="mt-3">
-                {searchResults.length ? (
-                  <ul className="list-group">
-                    {searchResults.map(p => (
-                      <li key={p.account_id} className="list-group-item d-flex align-items-center">
-                        <img src={p.avatarfull} alt="Avatar" className="img-thumbnail" />
-                        <div>
-                          <strong>{p.personaname || 'Unknown'}</strong>
-                          <p>Account ID: {p.account_id}</p>
-                          <button className="btn btn-secondary btn-sm" onClick={() => { setAccountId(p.account_id); }}>{'View Profile'}</button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
+    <div className="max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Dota 2 Player Info Viewer</h1>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="dota-card">
+          <div className="border-b border-white/5 p-4"><h2 className="text-xl font-semibold">Search Player</h2></div>
+          <div className="p-4">
+            <form onSubmit={searchPlayers}>
+              <div className="mb-3">
+                <label className="block text-sm mb-1">Enter Player Name:</label>
+                <input className="dota-input w-full" value={playerName} onChange={e=>setPlayerName(e.target.value)} placeholder="Enter Player Name" />
               </div>
+              <button type="submit" className="dota-btn">Search Player</button>
+            </form>
+            <div className="mt-3">
+              {searchResults.length ? (
+                <ul className="space-y-2">
+                  {searchResults.map(p => (
+                    <li key={p.account_id} className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
+                      <img src={p.avatarfull} alt="Avatar" className="w-12 h-12 rounded-full border border-white/10" />
+                      <div className="space-y-1">
+                        <strong>{p.personaname || 'Unknown'}</strong>
+                        <p>Account ID: {p.account_id}</p>
+                        <button className="dota-btn" onClick={() => { setAccountId(p.account_id); }}>{'View Profile'}</button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
           </div>
         </div>
 
-        <div className="col-md-6">
-          <div className="card mb-4">
-            <div className="card-header"><h2>Player Info</h2></div>
-            <div className="card-body">
-              <form onSubmit={fetchPlayer}>
-                <div className="form-group">
-                  <label>Enter Account ID:</label>
-                  <input className="form-control" value={accountId} onChange={e=>setAccountId(e.target.value)} placeholder="Enter Player Account ID" />
-                </div>
-                <button type="submit" className="btn btn-primary">Get Player Info</button>
-              </form>
-              <div className="mt-3">
-                {errorMessage && (<div className="alert alert-danger">{errorMessage}</div>)}
-                {playerInfo ? (
-                  <div>
-                    <h3>Player Information</h3>
-                    <img src={playerInfo.profile.avatarmedium} alt="Player Avatar" className="img-thumbnail mb-3" />
-                    <p><strong>Persona Name:</strong> {playerInfo.profile.personaname || 'N/A'}</p>
-                    <p><strong>Account ID:</strong> {playerInfo.profile.account_id}</p>
-                    <p><strong>Steam ID:</strong> {playerInfo.profile.steamid}</p>
-                    <p><strong>Last Login:</strong> {playerInfo.profile.last_login || 'N/A'}</p>
-                    {renderRank()}
-                    <a href={playerInfo.profile.profileurl} target="_blank" className="btn btn-secondary" rel="noreferrer">View Steam Profile</a>
-                  </div>
-                ) : null}
+        <div className="dota-card">
+          <div className="border-b border-white/5 p-4"><h2 className="text-xl font-semibold">Player Info</h2></div>
+          <div className="p-4">
+            <form onSubmit={fetchPlayer}>
+              <div className="mb-3">
+                <label className="block text-sm mb-1">Enter Account ID:</label>
+                <input className="dota-input w-full" value={accountId} onChange={e=>setAccountId(e.target.value)} placeholder="Enter Player Account ID" />
               </div>
+              <button type="submit" className="dota-btn">Get Player Info</button>
+            </form>
+            <div className="mt-3">
+              {errorMessage && (<div className="dota-card p-3 text-red-300">{errorMessage}</div>)}
+              {playerInfo ? (
+                <div>
+                  <h3>Player Information</h3>
+                  <img src={playerInfo.profile.avatarmedium} alt="Player Avatar" className="w-20 h-20 rounded-full border border-white/10 mb-3" />
+                  <p><strong>Persona Name:</strong> {playerInfo.profile.personaname || 'N/A'}</p>
+                  <p><strong>Account ID:</strong> {playerInfo.profile.account_id}</p>
+                  <p><strong>Steam ID:</strong> {playerInfo.profile.steamid}</p>
+                  <p><strong>Last Login:</strong> {playerInfo.profile.last_login || 'N/A'}</p>
+                  {renderRank()}
+                  <a href={playerInfo.profile.profileurl} target="_blank" className="dota-btn" rel="noreferrer">View Steam Profile</a>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
       </div>
 
-      <section className="card mb-4 player-card border">
-        <header className="card-header player-card bg-secondary text-white"><h2>Last Match Stats</h2></header>
-        <div className="card-body player-card">
-          <div id="lastMatchStats" className="chart-container player-card">
+      <section className="dota-card mt-6">
+        <div className="border-b border-white/5 p-4"><h2 className="text-xl font-semibold">Last Match Stats</h2></div>
+        <div className="p-4">
+          <div id="lastMatchStats">
             <canvas ref={chartRef} />
           </div>
         </div>

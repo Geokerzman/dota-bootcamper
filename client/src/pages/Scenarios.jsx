@@ -62,21 +62,23 @@ export default function Scenarios() {
 
       <div className="mt-6 space-y-8">
         <div className="dota-card p-4">
-          <div className="row">
-            {live.length ? live.map(game => (
-              <div className="col-md-6" key={game.match_id}>
-                <div className="card mb-3">
-                  <div className="card-header"><h5>League: {game.league_name || 'Unknown'}</h5></div>
-                  <div className="card-body">
-                    <p><strong>Match ID:</strong> {game.match_id}</p>
-                    <p><strong>Spectators:</strong> {game.spectators || '0'}</p>
-                    <p><strong>Radiant Team:</strong> {game.radiant_team || 'N/A'}</p>
-                    <p><strong>Dire Team:</strong> {game.dire_team || 'N/A'}</p>
+          {live.length ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {live.map(game => (
+                <div className="dota-card p-4" key={game.match_id}>
+                  <div className="border-b border-white/5 pb-2 mb-3">
+                    <h5 className="text-lg font-semibold">League: {game.league_name || 'Unknown'}</h5>
                   </div>
+                  <p><span className="text-gray-400">Match ID:</span> {game.match_id}</p>
+                  <p><span className="text-gray-400">Spectators:</span> {game.spectators || '0'}</p>
+                  <p><span className="text-gray-400">Radiant Team:</span> {game.radiant_team || 'N/A'}</p>
+                  <p><span className="text-gray-400">Dire Team:</span> {game.dire_team || 'N/A'}</p>
                 </div>
-              </div>
-            )) : <div className="alert alert-warning">No live matches available at the moment.</div>}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-gray-400">No live matches available at the moment.</div>
+          )}
         </div>
 
         <div className="dota-card p-4">

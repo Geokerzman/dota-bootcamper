@@ -6,10 +6,24 @@
   color-scheme: dark;
 }
 
-body { @apply bg-dotaBg text-gray-200 antialiased; }
+body {
+  @apply text-gray-200 antialiased;
+  background-color: theme('colors.dotaBg');
+  background-image: linear-gradient(rgba(14,20,27,0.8), rgba(14,20,27,0.9)), url('/background.png');
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+}
 
 .dota-card { @apply bg-dotaCard/80 backdrop-blur-md rounded-xl shadow-glow border border-white/5; }
 .dota-btn { @apply inline-flex items-center justify-center rounded-md bg-dotaAccent hover:bg-dotaAccentAlt transition px-4 py-2 font-semibold text-white; }
 .dota-input { @apply bg-white/10 border border-white/10 rounded-md px-3 py-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dotaAccent; }
+
+/* Force dark appearance for native controls */
+select, input, textarea, button {
+  color-scheme: dark;
+}
+
+select.dota-input option { @apply bg-dotaCard text-gray-100; }
 
 
