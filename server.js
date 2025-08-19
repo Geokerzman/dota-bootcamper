@@ -21,6 +21,16 @@ app.use(express.json()); // for parsing application/json
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve React build in production
+if (process.env.NODE_ENV === 'production') {
+    const clientBuildPath = path.join(__dirname, 'client', 'dist');
+    app.use(express.static(clientBuildPath));
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api')) return next();
+        res.sendFile(path.join(clientBuildPath, 'index.html'));
+    });
+}
+
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/steam', authMiddleware, require('./routes/steamRoutes'));
@@ -37,12 +47,7 @@ app.use('/api/proplayers', require('./routes/proPlayersRoutes'));
 
 
 
-app.get('/player', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'player.html'));
-});
-app.get('/pros', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'proPlayers.html'));
-});
+// React Router will handle these routes in production via the wildcard handler above
 
 
 

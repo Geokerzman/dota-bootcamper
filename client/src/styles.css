@@ -1,0 +1,114 @@
+:root {
+    --gradient-background: linear-gradient(120deg, #231b32, #34495e);
+    --card-background: rgba(52, 45, 83, 0.9);
+    --btn-background: #9b59b6;
+    --btn-background-hover: #8e44ad;
+    --text-color: #ecf0f1;
+    --heading-color: #ecf0f1;
+    --border-color: rgba(236, 240, 241, 0.3);
+    --font-family: 'Poppins', Arial, sans-serif;
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --shadow-dark: rgba(0, 0, 0, 0.25);
+}
+
+body {
+    background: var(--gradient-background);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 40px;
+    background: var(--card-background);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px var(--shadow-dark);
+}
+
+h1, h2, h3 {
+    color: var(--heading-color);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-size: 2rem;
+}
+.players-h1{ color: var(--heading-color); }
+.player-card{ background: var(--card-background); }
+
+.card {
+    color: var(--text-color);
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    padding: 20px;
+    backdrop-filter: blur(12px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px var(--shadow-dark); }
+
+.card-header { font-size: 22px; font-weight: 700; margin-bottom: 16px; color: var(--heading-color); }
+.card-body { color: var(--text-color); background: var(--card-background); }
+
+input.form-control, select.form-select {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+input.form-control:focus, select.form-select:focus {
+    outline: none; border-color: var(--btn-background); box-shadow: 0 0 10px var(--btn-background);
+}
+
+button.btn {
+    background: var(--btn-background);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+button.btn:hover { background: var(--btn-background-hover); transform: scale(1.05); }
+
+.rank-image { width: 70px; height: auto; margin-left: 20px; }
+.img-thumbnail { width: 80px; height: 80px; border-radius: 50%; margin-right: 20px; border: 2px solid var(--btn-background); }
+
+a { color: var(--btn-background); text-decoration: none; }
+a:hover { color: var(--btn-background-hover); text-decoration: underline; }
+
+.section-title {
+    font-size: 1.6rem; font-weight: bold; color: var(--heading-color); margin-bottom: 20px; background:var(--card-background);
+}
+
+.list-group-item { background:var(--card-background); transition: background-color 0.3s ease; }
+.list-group-item:hover { background-color: #2c3e50; }
+.list-group-item.d-flex { display: flex; align-items: center; padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+.list-group-item .img-thumbnail { border: 2px solid #9b59b6; }
+.list-group-item .btn { background-color: #9b59b6; color: #fff; font-size: 14px; padding: 6px 12px; border-radius: 5px; border: none; margin-top: 10px; }
+
+tr{ color: var(--text-color); }
+th{ color: var(--heading-color); }
+
+.tab-content { border:none; padding: 20px; }
+.nav-tabs .nav-link { border-radius: 0; font-weight: bold; text-transform: uppercase; }
+.nav-tabs .nav-link.active { background-color: var(--btn-background); color: white; }
+.card { border-radius: 15px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+.btn-primary { background:var(--card-background); border: none; }
+.btn-primary:hover { background-color: var(--btn-background); }
+.form-control { border-radius: 10px; }
+.list-group-item img { border-radius: 50%; margin-right: 15px; }
+.list-group-item { border: none; }
+
+.section-container { background: var(--card-background); padding: 30px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-bottom: 30px; }
+.search-section, .info-section { margin-bottom: 40px; }
+
+

@@ -27,6 +27,20 @@ Dota-bootcamper is a web application designed to provide detailed statistics and
 ### Frontend
 - **React**: For creating an interactive and dynamic user interface.
 
+---
+
+## Frontend (React) development
+
+- Install client dependencies: `npm install --prefix client`
+- Run client dev server: `npm run client:dev`
+- API requests to `/api/*` are proxied to `http://localhost:5000` via Vite config.
+
+## Build and serve
+
+- Build client: `npm run client:build`
+- Start backend: `npm start`
+- In production (`NODE_ENV=production`), the server serves the React build from `client/dist`.
+
 ### Database
 - **PostgreSQL/MySQL** (via Sequelize): Database for storing user and match data.
 
