@@ -108,4 +108,19 @@ router.get('/histograms', async (req, res) => {
     }
 });
 
+// Aggregated overview endpoint
+router.get('/overview', async (req, res) => {
+    const { account_id } = req.query;
+    if (!account_id) {
+        return res.status(400).json({ msg: 'Account ID is required' });
+    }
+    try {
+        const data = await openDotaService.fetchOverview(account_id);
+        res.json(data);
+    } catch (err) {
+        const status = err.response?.status || 500;
+        res.status(status).json({ message: 'Failed to fetch overview', error: err.message });
+    }
+});
+
 module.exports = router;
