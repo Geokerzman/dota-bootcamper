@@ -51,17 +51,17 @@ export default function Scenarios() {
 
   return (
     <div>
-      <h1 className="text-center">Dota 2 Live Games and Scenarios</h1>
+      <h1 className="text-3xl font-bold">Dota 2 Live Games and Scenarios</h1>
 
-      <ul className="nav nav-tabs mt-4">
-        <li className="nav-item"><button className="nav-link active" data-bs-toggle="tab" data-bs-target="#live">Live Games</button></li>
-        <li className="nav-item"><button className="nav-link" data-bs-toggle="tab" data-bs-target="#item">Item Timings</button></li>
-        <li className="nav-item"><button className="nav-link" data-bs-toggle="tab" data-bs-target="#lane">Lane Roles</button></li>
-        <li className="nav-item"><button className="nav-link" data-bs-toggle="tab" data-bs-target="#misc">Misc Scenarios</button></li>
-      </ul>
+      <div className="mt-4 grid grid-cols-2 gap-2 max-w-md">
+        <button className="dota-btn">Live Games</button>
+        <button className="dota-btn bg-white/10 hover:bg-white/20">Item Timings</button>
+        <button className="dota-btn bg-white/10 hover:bg-white/20">Lane Roles</button>
+        <button className="dota-btn bg-white/10 hover:bg-white/20">Misc Scenarios</button>
+      </div>
 
-      <div className="tab-content mt-4">
-        <div className="tab-pane fade show active" id="live">
+      <div className="mt-6 space-y-8">
+        <div className="dota-card p-4">
           <div className="row">
             {live.length ? live.map(game => (
               <div className="col-md-6" key={game.match_id}>
@@ -79,17 +79,17 @@ export default function Scenarios() {
           </div>
         </div>
 
-        <div className="tab-pane fade" id="item">
-          <form onSubmit={submitItem} className="mb-3">
+        <div className="dota-card p-4">
+          <form onSubmit={submitItem} className="mb-3 space-y-3">
             <div className="mb-3">
-              <label className="form-label">Item Name</label>
-              <input type="text" className="form-control" value={itemName} onChange={e=>setItemName(e.target.value)} placeholder="e.g., spirit_vessel" />
+              <label className="block text-sm mb-1">Item Name</label>
+              <input type="text" className="dota-input w-full" value={itemName} onChange={e=>setItemName(e.target.value)} placeholder="e.g., spirit_vessel" />
             </div>
             <div className="mb-3">
-              <label className="form-label">Hero ID</label>
-              <input type="number" className="form-control" value={heroIdItem} onChange={e=>setHeroIdItem(e.target.value)} placeholder="e.g., 1" />
+              <label className="block text-sm mb-1">Hero ID</label>
+              <input type="number" className="dota-input w-full" value={heroIdItem} onChange={e=>setHeroIdItem(e.target.value)} placeholder="e.g., 1" />
             </div>
-            <button type="submit" className="btn btn-primary">Get Item Timings</button>
+            <button type="submit" className="dota-btn">Get Item Timings</button>
           </form>
           <div>
             {itemResults.length ? itemResults.map((r, idx) => (
@@ -104,11 +104,11 @@ export default function Scenarios() {
           </div>
         </div>
 
-        <div className="tab-pane fade" id="lane">
-          <form onSubmit={submitLane} className="mb-3">
+        <div className="dota-card p-4">
+          <form onSubmit={submitLane} className="mb-3 space-y-3">
             <div className="mb-3">
-              <label className="form-label">Lane Role</label>
-              <select className="form-select" value={laneRole} onChange={e=>setLaneRole(e.target.value)}>
+              <label className="block text-sm mb-1">Lane Role</label>
+              <select className="dota-input w-full" value={laneRole} onChange={e=>setLaneRole(e.target.value)}>
                 <option value="1">Safe Lane</option>
                 <option value="2">Mid Lane</option>
                 <option value="3">Off Lane</option>
@@ -116,10 +116,10 @@ export default function Scenarios() {
               </select>
             </div>
             <div className="mb-3">
-              <label className="form-label">Hero ID</label>
-              <input type="number" className="form-control" value={heroIdLane} onChange={e=>setHeroIdLane(e.target.value)} placeholder="e.g., 1" />
+              <label className="block text-sm mb-1">Hero ID</label>
+              <input type="number" className="dota-input w-full" value={heroIdLane} onChange={e=>setHeroIdLane(e.target.value)} placeholder="e.g., 1" />
             </div>
-            <button type="submit" className="btn btn-primary">Get Lane Roles</button>
+            <button type="submit" className="dota-btn">Get Lane Roles</button>
           </form>
           <div>
             {laneResults.length ? laneResults.map((r, idx) => (
@@ -134,13 +134,13 @@ export default function Scenarios() {
           </div>
         </div>
 
-        <div className="tab-pane fade" id="misc">
-          <form onSubmit={submitMisc} className="mb-3">
+        <div className="dota-card p-4">
+          <form onSubmit={submitMisc} className="mb-3 space-y-3">
             <div className="mb-3">
-              <label className="form-label">Scenario Name</label>
-              <input type="text" className="form-control" value={scenario} onChange={e=>setScenario(e.target.value)} placeholder="e.g., comeback" />
+              <label className="block text-sm mb-1">Scenario Name</label>
+              <input type="text" className="dota-input w-full" value={scenario} onChange={e=>setScenario(e.target.value)} placeholder="e.g., comeback" />
             </div>
-            <button type="submit" className="btn btn-primary">Get Misc Scenarios</button>
+            <button type="submit" className="dota-btn">Get Misc Scenarios</button>
           </form>
           <div>
             {miscResults.length ? miscResults.map((r, idx) => (

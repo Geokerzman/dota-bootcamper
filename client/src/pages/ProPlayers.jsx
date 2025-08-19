@@ -11,33 +11,29 @@ export default function ProPlayers() {
       .catch(() => setError('Failed to load pro players'))
   }, [])
 
-  if (error) return <div className="alert alert-danger">{error}</div>
+  if (error) return <div className="dota-card p-4 text-red-300">{error}</div>
 
   return (
     <div>
-      <h1 className="main-title text-center">Dota 2 Pro Players Info</h1>
-      <div className="card shadow-lg p-4 mt-4">
-        <div className="card-header"><h2 className="card-title">Pro Players</h2></div>
-        <div className="card-body">
-          <div id="playerResults" className="mt-4">
-            {players.length ? (
-              players.map(player => (
-                <div className="player-card d-flex align-items-center mt-3" key={player.account_id}>
-                  <img src={player.avatarmedium || 'default-avatar.jpg'} alt="Player Avatar" className="player-avatar" />
-                  <div className="ms-3">
-                    <p><strong>Account ID:</strong> {player.account_id || 'N/A'}</p>
-                    <p><strong>Steam ID:</strong> {player.steamid || 'N/A'}</p>
-                    <p><strong>Persona Name:</strong> {player.personaname || 'N/A'}</p>
-                    <p><strong>Nickname:</strong> {player.name || 'N/A'}</p>
-                    <p><strong>Team Name:</strong> {player.team_name || 'N/A'}</p>
-                    <a href={player.profileurl} target="_blank" className="btn btn-secondary mt-3" rel="noreferrer">View Steam Profile</a>
-                  </div>
+      <h1 className="text-3xl font-bold">Dota 2 Pro Players Info</h1>
+      <div className="dota-card p-4 mt-4">
+        <div className="border-b border-white/5 pb-2 mb-4"><h2 className="text-xl font-semibold">Pro Players</h2></div>
+        <div id="playerResults" className="mt-4 space-y-3">
+          {players.length ? (
+            players.map(player => (
+              <div className="flex items-center gap-4 p-3 rounded-lg bg-white/5" key={player.account_id}>
+                <img src={player.avatarmedium || 'default-avatar.jpg'} alt="Player Avatar" className="w-14 h-14 rounded-full border border-white/10" />
+                <div className="space-y-1">
+                  <p><span className="text-gray-400">Account ID:</span> {player.account_id || 'N/A'}</p>
+                  <p><span className="text-gray-400">Persona:</span> {player.personaname || 'N/A'} <span className="text-gray-400">Nick:</span> {player.name || 'N/A'}</p>
+                  <p><span className="text-gray-400">Team:</span> {player.team_name || 'N/A'}</p>
+                  <a href={player.profileurl} target="_blank" className="dota-btn mt-2" rel="noreferrer">View Steam Profile</a>
                 </div>
-              ))
-            ) : (
-              <div className="alert alert-warning">No players data found.</div>
-            )}
-          </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-gray-400">No players data found.</div>
+          )}
         </div>
       </div>
     </div>
