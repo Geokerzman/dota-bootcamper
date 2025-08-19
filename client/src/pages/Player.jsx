@@ -7,6 +7,7 @@ export default function Player() {
   const [searchResults, setSearchResults] = useState([])
   const [accountId, setAccountId] = useState('')
   const [playerInfo, setPlayerInfo] = useState(null)
+  const [errorMessage, setErrorMessage] = useState('')
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
 
@@ -27,10 +28,77 @@ export default function Player() {
     try {
       const { data } = await axios.get(`/api/playerinfo`, { params: { account_id: accountId } })
       setPlayerInfo(data[0])
+      setErrorMessage('')
       fetchLastMatchStats(accountId)
-    } catch {
-      setPlayerInfo(null)
+    } catch (err) {
+      // Fallback: fetch directly from OpenDota
+      try {
+        const { data } = await axios.get(`https://api.opendota.com/api/players/${accountId}`)
+        const profile = data.profile || {}
+        setPlayerInfo({
+          solo_competitive_rank: data.solo_competitive_rank ?? null,
+          competitive_rank: data.competitive_rank ?? null,
+          rank_tier: data.rank_tier ?? null,
+          leaderboard_rank: data.leaderboard_rank ?? null,
+          profile: {
+            account_id: profile.account_id ?? null,
+            personaname: profile.personaname ?? null,
+            name: profile.name ?? null,
+            steamid: profile.steamid ?? null,
+            avatarmedium: profile.avatarmedium ?? null,
+            last_login: profile.last_login ?? null,
+            profileurl: profile.profileurl ?? null,
+          },
+        })
+        setErrorMessage('')
+        fetchLastMatchStats(accountId)
+      } catch (fallbackErr) {
+        setPlayerInfo(null)
+        const serverMsg = err?.response?.data?.message || err?.message || 'Unknown error'
+        setErrorMessage(`Failed to fetch player info: ${serverMsg}`)
+      }
     }
+  }
+
+  const renderRank = () => {
+    if (!playerInfo) return null
+    const tier = playerInfo.rank_tier
+    const tiers = { 1: 'Herald', 2: 'Guardian', 3: 'Crusader', 4: 'Archon', 5: 'Legend', 6: 'Ancient', 7: 'Divine', 8: 'Immortal' }
+    const major = Math.floor((tier || 0) / 10)
+    const division = (tier || 0) % 10
+    const rankName = tiers[major] || 'Unranked'
+    const base = '/ranks/'
+    const nameLower = rankName.toLowerCase()
+    const candidates = [
+      `${base}${rankName}.png`,
+      `${base}${nameLower}.png`,
+      `${base}${rankName}.webp`,
+      `${base}${nameLower}.webp`,
+      `${base}Unranked.png`,
+    ]
+    return (
+      <p>
+        <strong>Rank:</strong> {rankName} {division && rankName !== 'Immortal' ? division : ''}
+        {rankName && (
+          <img
+            src={candidates[0]}
+            data-idx="0"
+            alt={rankName}
+            className="rank-image"
+            onError={(e)=>{
+              const el = e.currentTarget
+              const idx = Number(el.getAttribute('data-idx')) || 0
+              if (idx + 1 < candidates.length) {
+                el.setAttribute('data-idx', String(idx + 1))
+                el.src = candidates[idx + 1]
+              } else {
+                el.style.display = 'none'
+              }
+            }}
+          />
+        )}
+      </p>
+    )
   }
 
   const fetchLastMatchStats = async (id) => {
@@ -121,6 +189,7 @@ export default function Player() {
                 <button type="submit" className="btn btn-primary">Get Player Info</button>
               </form>
               <div className="mt-3">
+                {errorMessage && (<div className="alert alert-danger">{errorMessage}</div>)}
                 {playerInfo ? (
                   <div>
                     <h3>Player Information</h3>
@@ -129,6 +198,7 @@ export default function Player() {
                     <p><strong>Account ID:</strong> {playerInfo.profile.account_id}</p>
                     <p><strong>Steam ID:</strong> {playerInfo.profile.steamid}</p>
                     <p><strong>Last Login:</strong> {playerInfo.profile.last_login || 'N/A'}</p>
+                    {renderRank()}
                     <a href={playerInfo.profile.profileurl} target="_blank" className="btn btn-secondary" rel="noreferrer">View Steam Profile</a>
                   </div>
                 ) : null}

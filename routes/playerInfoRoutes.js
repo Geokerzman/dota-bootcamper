@@ -13,26 +13,33 @@ router.get('/', async (req, res) => {
     try {
         const data = await openDotaService.fetchPlayerInfo(account_id);
 
+        if (!data || !data.profile) {
+            return res.status(404).json({ msg: 'Player not found or profile is private' });
+        }
+
+        const profile = data.profile || {};
         const playerInfo = {
-            solo_competitive_rank: data.solo_competitive_rank,
-            competitive_rank: data.competitive_rank,
-            rank_tier: data.rank_tier,
-            leaderboard_rank: data.leaderboard_rank,
+            solo_competitive_rank: data.solo_competitive_rank ?? null,
+            competitive_rank: data.competitive_rank ?? null,
+            rank_tier: data.rank_tier ?? null,
+            leaderboard_rank: data.leaderboard_rank ?? null,
             profile: {
-                account_id: data.profile.account_id,
-                personaname: data.profile.personaname,
-                name: data.profile.name,
-                steamid: data.profile.steamid,
-                avatarmedium: data.profile.avatarmedium,
-                last_login: data.profile.last_login,
-                profileurl: data.profile.profileurl,
+                account_id: profile.account_id ?? null,
+                personaname: profile.personaname ?? null,
+                name: profile.name ?? null,
+                steamid: profile.steamid ?? null,
+                avatarmedium: profile.avatarmedium ?? null,
+                last_login: profile.last_login ?? null,
+                profileurl: profile.profileurl ?? null,
             },
         };
 
         res.json([playerInfo]);
     } catch (err) {
-        console.error('Error fetching player info:', err.message);
-        res.status(500).send('Server error');
+        const status = err.response?.status || 500;
+        const errorData = err.response?.data || err.message;
+        console.error('Error fetching player info:', status, errorData);
+        res.status(status).json({ message: 'Failed to fetch player info', error: errorData });
     }
 });
 
@@ -100,3 +107,5 @@ router.get('/histograms', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+module.exports = router;
