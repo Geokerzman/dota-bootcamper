@@ -149,7 +149,10 @@ NODE_ENV=development
 3. **Set up your database**:
    - Create a MySQL database
    - Update the `.env` file with your database credentials
-   - The application will automatically sync models (in development mode)
+   - Run migrations to create the necessary tables:
+     ```bash
+     npm run migration:run
+     ```
 
 4. **Start the development server**:
    ```bash
@@ -195,8 +198,49 @@ This project has been migrated from Express.js to NestJS. The old Express code i
 
 ---
 
+## Player Data Caching
+
+The application implements a smart caching system for player data to reduce API calls and improve performance:
+
+- **Cache Duration**: Player data is cached for 24 hours
+- **Automatic Updates**: If cached data is older than 24 hours, it's automatically refreshed from the OpenDota API
+- **Comprehensive Storage**: The cache stores player profiles, statistics (totals, counts), heroes, peers, ratings, and win/loss data
+- **Database Storage**: All cached data is stored in the `player_cache` table
+
+### How It Works
+
+1. When a player info request is made, the system first checks the database cache
+2. If valid cached data exists (< 24 hours old), it's returned immediately
+3. If cache is expired or doesn't exist, fresh data is fetched from OpenDota API
+4. The cache is automatically updated with the new data
+5. Additional player statistics are fetched and cached for comprehensive data storage
+
+## Database Migrations
+
+The application uses database migrations to manage schema changes:
+
+### Running Migrations
+
+```bash
+# Run all pending migrations
+npm run migration:run
+
+# Rollback the last migration
+npm run migration:rollback
+```
+
+### Migration Files
+
+- `src/migrations/001-create-player-cache.ts`: Creates the `player_cache` table for storing cached player data
+
+### Migration Structure
+
+Migrations are located in `src/migrations/` and follow the naming convention: `{number}-{description}.ts`
+
 ## Notes
 
 - The application uses JWT (JSON Web Tokens) for authentication. Include the token in the `Authorization` header as `Bearer <token>` for protected routes.
 - All API endpoints maintain the same structure as before, so the React frontend should work without modifications.
 - The backend is fully typed with TypeScript for better code quality and developer experience.
+- Player data caching reduces API calls and improves response times significantly.
+- All services include comprehensive logging for debugging and monitoring.

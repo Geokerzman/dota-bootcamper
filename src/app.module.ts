@@ -11,6 +11,7 @@ import { SteamModule } from './steam/steam.module';
 import { ProPlayersModule } from './pro-players/pro-players.module';
 import { DatabaseModule } from './database/database.module';
 import { User } from './models/user.model';
+import { PlayerCache } from './models/player-cache.model';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { User } from './models/user.model';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      models: [User],
+      models: [User, PlayerCache],
       autoLoadModels: true,
       synchronize: false, // Set to false in production
     }),

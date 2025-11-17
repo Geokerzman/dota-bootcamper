@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { OpenDotaService } from '../services/open-dota.service';
 
 @Injectable()
 export class LiveService {
+  private readonly logger = new Logger(LiveService.name);
   private heroCache: any = null;
   private playerCache: Record<string, any> = {};
 
@@ -10,7 +11,7 @@ export class LiveService {
 
   private async getHeroes() {
     if (!this.heroCache) {
-      console.log('Fetching heroes from OpenDota API...');
+      this.logger.debug('Fetching heroes from OpenDota API for live matches');
       this.heroCache = await this.openDotaService.getHeroes();
     }
     return this.heroCache;
@@ -18,28 +19,31 @@ export class LiveService {
 
   private async getPlayerProfile(accountId: number) {
     if (!accountId) return null;
-    if (this.playerCache[accountId]) return this.playerCache[accountId];
+    if (this.playerCache[accountId]) {
+      this.logger.debug(`Using cached profile for player: ${accountId}`);
+      return this.playerCache[accountId];
+    }
 
     try {
-      console.log(`Fetching profile for player: ${accountId}`);
+      this.logger.debug(`Fetching profile for player: ${accountId}`);
       const profile = await this.openDotaService.fetchPlayerInfo(accountId.toString());
       this.playerCache[accountId] = profile;
       return profile;
     } catch (err) {
-      console.warn(`Failed to fetch profile for player ${accountId}: ${err.message}`);
+      this.logger.warn(`Failed to fetch profile for player ${accountId}: ${err.message}`);
       return null;
     }
   }
 
   async getLiveGames() {
+    this.logger.debug('Fetching live matches from OpenDota API');
     try {
-      console.log('Fetching live matches from OpenDota API...');
       const liveMatches = await this.openDotaService.getLiveGames();
 
-      console.log(`Total live matches fetched: ${liveMatches.length}`);
+      this.logger.debug(`Total live matches fetched: ${liveMatches.length}`);
 
       if (!Array.isArray(liveMatches) || liveMatches.length === 0) {
-        console.warn('No live matches found.');
+        this.logger.warn('No live matches found');
         throw new NotFoundException('No live matches found');
       }
 
@@ -47,7 +51,9 @@ export class LiveService {
       const shuffledMatches = liveMatches.sort(() => 0.5 - Math.random());
       const randomMatches = shuffledMatches.slice(0, 3);
 
-      console.log(`Random matches selected: ${randomMatches.map((match) => match.match_id).join(', ')}`);
+      this.logger.debug(
+        `Random matches selected: ${randomMatches.map((match) => match.match_id).join(', ')}`,
+      );
 
       // Get cached heroes list
       const heroes = await this.getHeroes();
@@ -67,9 +73,7 @@ export class LiveService {
 
               // Get rank from profile if available
               const rank = profile ? profile.rank_tier : null;
-              const formattedRank = rank
-                ? `${Math.floor(rank / 10)}.${rank % 10}`
-                : 'Unranked';
+              const formattedRank = rank ? `${Math.floor(rank / 10)}.${rank % 10}` : 'Unranked';
 
               return {
                 account_id: player.account_id || null,
@@ -103,11 +107,11 @@ export class LiveService {
         }),
       );
 
-      console.log('Returning formatted match details...');
+      this.logger.debug(`Returning ${matchDetails.length} formatted match details`);
       return matchDetails;
-    } catch (err) {
-      console.error('Error fetching live matches:', err.message);
-      throw err;
+    } catch (error) {
+      this.logger.error(`Error fetching live matches: ${error.message}`);
+      throw error;
     }
   }
 }
