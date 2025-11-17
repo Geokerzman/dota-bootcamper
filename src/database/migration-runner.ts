@@ -1,6 +1,8 @@
 import { Sequelize } from 'sequelize';
 import * as dotenv from 'dotenv';
+import { up as createUsersUp, down as createUsersDown } from '../migrations/000-create-users';
 import { up as createPlayerCacheUp, down as createPlayerCacheDown } from '../migrations/001-create-player-cache';
+import { up as createLibraryTablesUp, down as createLibraryTablesDown } from '../migrations/002-create-library-tables';
 
 dotenv.config();
 
@@ -23,8 +25,14 @@ async function runMigrations() {
 
     // Run migrations
     console.log('Running migrations...');
+    await createUsersUp(queryInterface);
+    console.log('Migration 000-create-users completed successfully.');
+    
     await createPlayerCacheUp(queryInterface);
     console.log('Migration 001-create-player-cache completed successfully.');
+    
+    await createLibraryTablesUp(queryInterface);
+    console.log('Migration 002-create-library-tables completed successfully.');
 
     await sequelize.close();
     console.log('Migrations completed successfully.');
@@ -43,8 +51,14 @@ async function rollbackMigrations() {
 
     // Rollback migrations
     console.log('Rolling back migrations...');
+    await createLibraryTablesDown(queryInterface);
+    console.log('Migration 002-create-library-tables rolled back successfully.');
+    
     await createPlayerCacheDown(queryInterface);
     console.log('Migration 001-create-player-cache rolled back successfully.');
+    
+    await createUsersDown(queryInterface);
+    console.log('Migration 000-create-users rolled back successfully.');
 
     await sequelize.close();
     console.log('Rollback completed successfully.');

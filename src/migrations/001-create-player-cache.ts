@@ -1,6 +1,12 @@
 import { QueryInterface, DataTypes } from 'sequelize';
 
 export async function up(queryInterface: QueryInterface): Promise<void> {
+  // Check if table exists, drop it if it does (for clean migration)
+  const tableExists = await queryInterface.tableExists('player_cache');
+  if (tableExists) {
+    await queryInterface.dropTable('player_cache');
+  }
+  
   await queryInterface.createTable('player_cache', {
     id: {
       type: DataTypes.INTEGER,

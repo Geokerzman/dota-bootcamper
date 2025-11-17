@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { Chart } from 'chart.js/auto'
+import AddToLibrary from '../components/AddToLibrary'
 
 export default function Player() {
   const [searchMode, setSearchMode] = useState('name') // 'name' | 'id'
@@ -390,9 +391,16 @@ export default function Player() {
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-between mb-6">
             <button onClick={() => setShowSearch(true)} className="dota-btn">← Back to Search</button>
-            <a href={playerInfo.profile.profileurl} target="_blank" className="dota-btn" rel="noreferrer">
-              Steam Profile
-            </a>
+            <div className="flex items-center gap-3">
+              <AddToLibrary
+                itemType="player"
+                itemId={playerInfo.profile.account_id}
+                itemName={playerInfo.profile.personaname}
+              />
+              <a href={playerInfo.profile.profileurl} target="_blank" className="dota-btn" rel="noreferrer">
+                Steam Profile
+              </a>
+            </div>
           </div>
           
           <div className="flex items-center gap-6">

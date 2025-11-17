@@ -134,7 +134,7 @@ export class PlayerService {
    * Format player info from cache
    */
   private formatPlayerInfoFromCache(cachedPlayer: PlayerCache): PlayerInfoDto[] {
-    const profile = cachedPlayer.profileData || {};
+    const profile = cachedPlayer.profileData || {} as any;
     const playerInfo: PlayerInfoDto = {
       solo_competitive_rank: cachedPlayer.soloCompetitiveRank ?? null,
       competitive_rank: cachedPlayer.competitiveRank ?? null,

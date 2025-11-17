@@ -1,11 +1,16 @@
-import { Column, Model, Table, DataType, Index } from 'sequelize-typescript';
+import { Column, Model, Table, DataType } from 'sequelize-typescript';
 
 @Table({
   tableName: 'player_cache',
   timestamps: true,
   underscored: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['account_id'],
+    },
+  ],
 })
-@Index(['account_id'], { unique: true })
 export class PlayerCache extends Model<PlayerCache> {
   @Column({
     type: DataType.INTEGER,

@@ -16,21 +16,31 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid md:grid-cols-3 gap-6">
-        <Card title="Live Matches" desc="Watch scores and rosters update in real-time." to="/live"/>
-        <Card title="Scenarios" desc="Query item timings, lane roles and more." to="/scenarios"/>
-        <Card title="Pro Players" desc="Browse the pro scene and player profiles." to="/pros"/>
+      <section className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card title="Live Matches" desc="Watch scores and rosters update in real-time." to="/live" icon="🎮"/>
+        <Card title="Player Stats" desc="Search and analyze player profiles." to="/player" icon="👤"/>
+        <Card title="Compare Players" desc="Compare up to 5 players side-by-side." to="/compare" icon="⚔️"/>
+        <Card title="Analytics" desc="Hero recommendations and meta analysis." to="/analytics" icon="📊"/>
+        <Card title="My Library" desc="Bookmark players, heroes, and matches." to="/library" icon="📚"/>
+        <Card title="Alerts" desc="Set up custom notifications." to="/alerts" icon="🔔"/>
+        <Card title="Pro Players" desc="Browse the pro scene and player profiles." to="/pros" icon="⭐"/>
+        <Card title="Scenarios" desc="Query item timings, lane roles and more." to="/scenarios" icon="🔍"/>
       </section>
     </div>
   )
 }
 
-function Card({ title, desc, to }){
+function Card({ title, desc, to, icon }){
   return (
-    <Link to={to} className="dota-card p-6 hover:shadow-xl hover:shadow-dotaAccent/20 transition block">
-      <h3 className="text-xl font-semibold">{title}</h3>
-      <p className="text-gray-400 mt-2">{desc}</p>
-      <span className="inline-block mt-4 text-dotaAccent">Explore →</span>
+    <Link to={to} className="dota-card p-6 hover:shadow-xl hover:shadow-dotaAccent/20 transition block group">
+      <div className="flex items-start gap-4">
+        <span className="text-3xl">{icon}</span>
+        <div className="flex-1">
+          <h3 className="text-xl font-semibold group-hover:text-dotaAccent transition">{title}</h3>
+          <p className="text-gray-400 mt-2">{desc}</p>
+          <span className="inline-block mt-4 text-dotaAccent opacity-0 group-hover:opacity-100 transition">Explore →</span>
+        </div>
+      </div>
     </Link>
   )
 }

@@ -9,9 +9,16 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { LiveModule } from './live/live.module';
 import { SteamModule } from './steam/steam.module';
 import { ProPlayersModule } from './pro-players/pro-players.module';
+import { LibraryModule } from './library/library.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { AlertsModule } from './alerts/alerts.module';
 import { DatabaseModule } from './database/database.module';
 import { User } from './models/user.model';
 import { PlayerCache } from './models/player-cache.model';
+import { Library } from './models/library.model';
+import { PlayerComparison } from './models/player-comparison.model';
+import { Alert } from './models/alert.model';
+import { PerformanceTrend } from './models/performance-trend.model';
 
 @Module({
   imports: [
@@ -25,7 +32,7 @@ import { PlayerCache } from './models/player-cache.model';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      models: [User, PlayerCache],
+      models: [User, PlayerCache, Library, PlayerComparison, Alert, PerformanceTrend],
       autoLoadModels: true,
       synchronize: false, // Set to false in production
     }),
@@ -38,6 +45,9 @@ import { PlayerCache } from './models/player-cache.model';
     LiveModule,
     SteamModule,
     ProPlayersModule,
+    LibraryModule,
+    AnalyticsModule,
+    AlertsModule,
   ],
 })
 export class AppModule {}

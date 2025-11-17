@@ -6,13 +6,23 @@ Dota-bootcamper is a web application designed to provide detailed statistics and
 
 ## Features
 
+### Core Features
 - **User Authentication**: Secure login system with JWT tokens for accessing personalized data.
 - **Player Statistics**: View player profiles, match history, and detailed match summaries.
 - **Live Matches**: Fetch live games data directly from OpenDota.
 - **Leaderboards**: Display rankings of top-performing players.
 - **Heroes Statistics**: Explore detailed stats for each Dota 2 hero.
-- **Responsive Frontend**: Built with React for a seamless user experience.
-- **Static File Serving**: Hosts a public-facing webpage for additional tools or resources.
+- **Player Data Caching**: Smart 24-hour caching system to reduce API calls and improve performance.
+
+### Advanced Features (Beyond Dotabuff)
+- **📚 Library System**: Bookmark and organize your favorite players, heroes, and matches in a personal library.
+- **⚔️ Player Comparison**: Compare up to 5 players side-by-side with detailed statistics and metrics.
+- **🎯 Hero Recommendations**: Get personalized hero recommendations based on your playstyle and performance.
+- **📊 Performance Trends**: Track your performance over time with historical data and trend analysis.
+- **🔔 Custom Alerts**: Set up alerts for player matches, rank changes, and custom events.
+- **📈 Meta Analysis**: View current meta statistics including hero win rates and popular picks.
+- **💾 Saved Comparisons**: Save player comparisons for quick access later.
+- **📝 Personal Notes**: Add notes to your bookmarked items for personal reference.
 
 ---
 
@@ -106,6 +116,35 @@ The server will serve both the API endpoints and the React application in produc
 ### Steam Integration
 - **POST** `/api/steam/link`: Link Steam account to user (requires JWT).
 
+### Library (Favorites/Bookmarks)
+- **GET** `/api/library`: Get user's library items (requires JWT).
+- **GET** `/api/library?type={player|hero|match}`: Get library items filtered by type (requires JWT).
+- **POST** `/api/library`: Add item to library (requires JWT).
+  - Body: `{ itemType: 'player'|'hero'|'match', itemId: number, notes?: string }`
+- **DELETE** `/api/library/:type/:id`: Remove item from library (requires JWT).
+- **PUT** `/api/library/:type/:id/notes`: Update item notes (requires JWT).
+- **GET** `/api/library/check/:type/:id`: Check if item is in library (requires JWT).
+
+### Analytics & Comparisons
+- **POST** `/api/analytics/compare`: Compare multiple players (requires JWT).
+  - Body: `{ accountIds: number[] }` (2-5 players)
+- **POST** `/api/analytics/compare/save`: Save comparison for later (requires JWT).
+  - Body: `{ comparisonName: string, accountIds: number[] }`
+- **GET** `/api/analytics/compare/saved`: Get saved comparisons (requires JWT).
+- **GET** `/api/analytics/recommendations/:accountId`: Get hero recommendations for player (requires JWT).
+- **GET** `/api/analytics/meta`: Get meta analysis (hero win rates, popular picks).
+- **POST** `/api/analytics/trends/record`: Record performance trend snapshot (requires JWT).
+  - Body: `{ accountId: number }`
+- **GET** `/api/analytics/trends/:accountId?days=30`: Get performance trends (requires JWT).
+
+### Alerts & Notifications
+- **POST** `/api/alerts`: Create alert (requires JWT).
+  - Body: `{ alertType: 'player_match'|'player_rank_change'|'match_started'|'custom', alertName: string, targetId?: number, conditions?: any }`
+- **GET** `/api/alerts`: Get user's alerts (requires JWT).
+- **GET** `/api/alerts?status={active|triggered|disabled}`: Get alerts filtered by status (requires JWT).
+- **PUT** `/api/alerts/:id`: Update alert (requires JWT).
+- **DELETE** `/api/alerts/:id`: Delete alert (requires JWT).
+
 ---
 
 ## Setup Instructions
@@ -147,12 +186,24 @@ NODE_ENV=development
    ```
 
 3. **Set up your database**:
-   - Create a MySQL database
-   - Update the `.env` file with your database credentials
-   - Run migrations to create the necessary tables:
+   - **Option 1: Using Docker (Recommended)**
      ```bash
+     # Start MySQL database container
+     docker-compose up -d db
+     
+     # Wait ~10-15 seconds for MySQL to initialize, then run migrations
      npm run migration:run
      ```
+   - **Option 2: Using Local MySQL**
+     - Install and start MySQL locally
+     - Create a database: `CREATE DATABASE dota_bootcamper;`
+     - Update the `.env` file with your database credentials
+     - Run migrations:
+       ```bash
+       npm run migration:run
+       ```
+   
+   **Note:** Make sure your `.env` file exists with the correct database credentials. If it doesn't exist, create it based on the `.env.example` file.
 
 4. **Start the development server**:
    ```bash
@@ -179,8 +230,12 @@ dota-bootcamper/
 │   ├── live/              # Live games module
 │   ├── steam/             # Steam integration module
 │   ├── pro-players/       # Pro players module
+│   ├── library/           # Library/Favorites module
+│   ├── analytics/         # Analytics and comparisons module
+│   ├── alerts/            # Alerts and notifications module
 │   ├── services/          # Shared services (OpenDota API)
 │   ├── models/            # Database models
+│   ├── migrations/        # Database migrations
 │   ├── database/          # Database configuration
 │   ├── utils/             # Utility functions
 │   ├── app.module.ts      # Root application module
@@ -232,10 +287,58 @@ npm run migration:rollback
 ### Migration Files
 
 - `src/migrations/001-create-player-cache.ts`: Creates the `player_cache` table for storing cached player data
+- `src/migrations/002-create-library-tables.ts`: Creates tables for Library, Player Comparisons, Alerts, and Performance Trends
 
 ### Migration Structure
 
 Migrations are located in `src/migrations/` and follow the naming convention: `{number}-{description}.ts`
+
+## New Features Overview
+
+### 📚 Library System
+The Library feature allows users to bookmark and organize their favorite content:
+- **Players**: Save favorite players for quick access
+- **Heroes**: Bookmark heroes you want to track or learn
+- **Matches**: Save interesting matches for later review
+- **Personal Notes**: Add custom notes to any bookmarked item
+- **Quick Access**: Filter library by type (player/hero/match)
+
+### ⚔️ Player Comparison
+Compare up to 5 players side-by-side with comprehensive statistics:
+- **Win Rates**: Compare overall performance
+- **KDA Ratios**: Analyze combat effectiveness
+- **Rank Comparison**: See MMR and rank differences
+- **Hero Preferences**: Compare most played heroes
+- **Save Comparisons**: Store comparisons for future reference
+
+### 🎯 Hero Recommendations
+Get personalized hero suggestions based on:
+- Your play history and performance
+- Heroes you haven't played much
+- Similar heroes to your best performers
+- Current meta trends
+
+### 📊 Performance Trends
+Track your improvement over time:
+- Historical snapshots of your stats
+- Win rate trends
+- MMR progression
+- KDA improvements
+- Visualize your growth
+
+### 🔔 Custom Alerts
+Set up notifications for:
+- When favorite players start a match
+- Rank changes (promotions/demotions)
+- Match events
+- Custom conditions
+
+### 📈 Meta Analysis
+Stay updated with the current meta:
+- Most picked heroes
+- Highest win rate heroes
+- Most banned heroes
+- Pro scene trends
 
 ## Notes
 

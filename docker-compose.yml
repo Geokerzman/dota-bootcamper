@@ -6,13 +6,19 @@ services:
     container_name: mysql_db
     restart: always
     environment:
-      MYSQL_USER: ${DB_USER}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER:-dota_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     build:

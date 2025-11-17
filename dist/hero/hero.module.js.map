@@ -1,0 +1,1 @@
+{"version":3,"file":"hero.module.js","sourceRoot":"","sources":["../../src/hero/hero.module.ts"],"names":[],"mappings":";;;;;;;;;AAAA,2CAAwC;AACxC,uDAAmD;AACnD,iDAA6C;AAC7C,qEAAgE;AAMzD,IAAM,UAAU,GAAhB,MAAM,UAAU;CAAG,CAAA;AAAb,gCAAU;qBAAV,UAAU;IAJtB,IAAA,eAAM,EAAC;QACN,WAAW,EAAE,CAAC,gCAAc,CAAC;QAC7B,SAAS,EAAE,CAAC,0BAAW,EAAE,mCAAe,CAAC;KAC1C,CAAC;GACW,UAAU,CAAG"}

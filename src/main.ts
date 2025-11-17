@@ -25,9 +25,9 @@ async function bootstrap() {
     app.useStaticAssets(clientBuildPath);
     
     // Serve index.html for all non-API routes
-    const httpAdapter = app.getHttpAdapter();
-    httpAdapter.get('*', (req, res, next) => {
-      if (req.url.startsWith('/api')) {
+    const express = app.getHttpAdapter().getInstance();
+    express.get('*', (req: any, res: any, next: any) => {
+      if (req.url && req.url.startsWith('/api')) {
         return next();
       }
       res.sendFile(join(clientBuildPath, 'index.html'));
