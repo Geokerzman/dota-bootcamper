@@ -24,6 +24,16 @@ export default function Library() {
       setItems(data)
     } catch (error) {
       console.error('Failed to load library:', error)
+      // Check if token expired
+      if (error.response?.status === 401) {
+        const shouldLogin = confirm('Your session has expired. Please log in again to access your library.')
+        if (shouldLogin) {
+          localStorage.removeItem('token')
+          window.location.href = '/login'
+        }
+        setItems([])
+        return
+      }
       setItems([])
     } finally {
       setLoading(false)
@@ -36,11 +46,25 @@ export default function Library() {
       loadLibrary()
     } catch (error) {
       console.error('Failed to remove item:', error)
+      if (error.response?.status === 401) {
+        const shouldLogin = confirm('Your session has expired. Please log in again.')
+        if (shouldLogin) {
+          localStorage.removeItem('token')
+          window.location.href = '/login'
+        }
+        return
+      }
       alert('Failed to remove item from library')
     }
   }
 
   const updateNote = async (itemType, itemId) => {
+    if (!itemType || !itemId) {
+      console.error('Invalid itemType or itemId:', { itemType, itemId })
+      alert('Invalid item data. Please try again.')
+      return
+    }
+    
     try {
       await axios.put(`/api/library/${itemType}/${itemId}/notes`, { notes: noteText })
       setEditingNote(null)
@@ -48,7 +72,16 @@ export default function Library() {
       loadLibrary()
     } catch (error) {
       console.error('Failed to update note:', error)
-      alert('Failed to update note')
+      if (error.response?.status === 401) {
+        const shouldLogin = confirm('Your session has expired. Please log in again.')
+        if (shouldLogin) {
+          localStorage.removeItem('token')
+          window.location.href = '/login'
+        }
+        return
+      }
+      const errorMsg = error.response?.data?.message || 'Failed to update note'
+      alert(errorMsg)
     }
   }
 
@@ -145,96 +178,103 @@ export default function Library() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
-            <div key={`${item.item_type}-${item.item_id}`} className="dota-card p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{getItemIcon(item.item_type)}</span>
-                  <div>
-                    <h3 className="font-semibold text-lg">{item.item_name || `Item ${item.item_id}`}</h3>
-                    <p className="text-sm text-gray-400 capitalize">{item.item_type}</p>
+          {items.map((item) => {
+            // Handle both camelCase and snake_case property names
+            const itemType = item.itemType || item.item_type
+            const itemId = item.itemId || item.item_id
+            const itemName = item.itemName || item.item_name
+            const notes = item.notes || ''
+            
+            return (
+              <div key={`${itemType}-${itemId}`} className="dota-card p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{getItemIcon(itemType)}</span>
+                    <div>
+                      <h3 className="font-semibold text-lg">{itemName || `Item ${itemId}`}</h3>
+                      <p className="text-sm text-gray-400 capitalize">{itemType}</p>
+                    </div>
                   </div>
-                </div>
-                <button
-                  onClick={() => removeItem(item.item_type, item.item_id)}
-                  className="text-red-400 hover:text-red-300 text-xl"
-                  title="Remove from library"
-                >
-                  ×
-                </button>
-              </div>
-
-              {item.metadata && (
-                <div className="mb-4 text-sm text-gray-400">
-                  {item.item_type === 'player' && item.metadata.rankTier && (
-                    <div>Rank: {item.metadata.rankTier}</div>
-                  )}
-                  {item.item_type === 'hero' && item.metadata.primaryAttr && (
-                    <div>Attribute: {item.metadata.primaryAttr}</div>
-                  )}
-                  {item.item_type === 'match' && item.metadata.duration && (
-                    <div>Duration: {Math.floor(item.metadata.duration / 60)}:{(item.metadata.duration % 60).toString().padStart(2, '0')}</div>
-                  )}
-                </div>
-              )}
-
-              {editingNote === `${item.item_type}-${item.item_id}` ? (
-                <div className="space-y-2">
-                  <textarea
-                    className="dota-input w-full text-sm"
-                    rows="3"
-                    value={noteText}
-                    onChange={(e) => setNoteText(e.target.value)}
-                    placeholder="Add a note..."
-                    defaultValue={item.notes || ''}
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => updateNote(item.item_type, item.item_id)}
-                      className="dota-btn text-sm px-3 py-1"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditingNote(null)
-                        setNoteText('')
-                      }}
-                      className="px-3 py-1 text-sm bg-white/10 hover:bg-white/20 rounded-md"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  {item.notes ? (
-                    <p className="text-sm text-gray-300 mb-2">{item.notes}</p>
-                  ) : (
-                    <p className="text-sm text-gray-500 italic mb-2">No notes</p>
-                  )}
                   <button
-                    onClick={() => {
-                      setEditingNote(`${item.item_type}-${item.item_id}`)
-                      setNoteText(item.notes || '')
-                    }}
-                    className="text-sm text-dotaAccent hover:underline"
+                    onClick={() => removeItem(itemType, itemId)}
+                    className="text-red-400 hover:text-red-300 text-xl"
+                    title="Remove from library"
                   >
-                    {item.notes ? 'Edit note' : 'Add note'}
+                    ×
                   </button>
                 </div>
-              )}
 
-              <div className="mt-4 pt-4 border-t border-white/10">
-                <a
-                  href={getItemLink(item.item_type, item.item_id)}
-                  className="text-sm text-dotaAccent hover:underline"
-                >
-                  View Details →
-                </a>
+                {item.metadata && (
+                  <div className="mb-4 text-sm text-gray-400">
+                    {itemType === 'player' && item.metadata.rankTier && (
+                      <div>Rank: {item.metadata.rankTier}</div>
+                    )}
+                    {itemType === 'hero' && item.metadata.primaryAttr && (
+                      <div>Attribute: {item.metadata.primaryAttr}</div>
+                    )}
+                    {itemType === 'match' && item.metadata.duration && (
+                      <div>Duration: {Math.floor(item.metadata.duration / 60)}:{(item.metadata.duration % 60).toString().padStart(2, '0')}</div>
+                    )}
+                  </div>
+                )}
+
+                {editingNote === `${itemType}-${itemId}` ? (
+                  <div className="space-y-2">
+                    <textarea
+                      className="dota-input w-full text-sm"
+                      rows="3"
+                      value={noteText}
+                      onChange={(e) => setNoteText(e.target.value)}
+                      placeholder="Add a note..."
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => updateNote(itemType, itemId)}
+                        className="dota-btn text-sm px-3 py-1"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingNote(null)
+                          setNoteText('')
+                        }}
+                        className="px-3 py-1 text-sm bg-white/10 hover:bg-white/20 rounded-md"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {notes ? (
+                      <p className="text-sm text-gray-300 mb-2">{notes}</p>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic mb-2">No notes</p>
+                    )}
+                    <button
+                      onClick={() => {
+                        setEditingNote(`${itemType}-${itemId}`)
+                        setNoteText(notes || '')
+                      }}
+                      className="text-sm text-dotaAccent hover:underline"
+                    >
+                      {notes ? 'Edit note' : 'Add note'}
+                    </button>
+                  </div>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <a
+                    href={getItemLink(itemType, itemId)}
+                    className="text-sm text-dotaAccent hover:underline"
+                  >
+                    View Details →
+                  </a>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

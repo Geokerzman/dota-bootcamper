@@ -44,6 +44,7 @@
     "start:prod": "node dist/main",
     "migration:run": "ts-node src/database/migration-runner.ts",
     "migration:rollback": "ts-node src/database/migration-runner.ts down",
+    "cache:clear": "ts-node src/database/clear-cache.ts",
     "client:dev": "npm run dev --prefix client",
     "client:build": "npm run build --prefix client",
     "client:preview": "npm run preview --prefix client"

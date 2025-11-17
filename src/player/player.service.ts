@@ -297,15 +297,36 @@ export class PlayerService {
       cachedPlayer.ratings
     ) {
       this.logger.debug(`Using cached overview for account_id: ${accountId}`);
+      
+      // Fetch recent matches from API (they change frequently)
+      let recentMatches = [];
+      try {
+        recentMatches = await this.openDotaService.fetchRecentMatches(accountId, 20);
+      } catch (error) {
+        this.logger.warn(`Failed to fetch recent matches for cached player ${accountId}: ${error.message}`);
+      }
+      
+      // Format the response to match API structure (same as fetchOverview)
+      // fetchPlayerInfo returns: { profile: {...}, rank_tier: ..., ... }
+      // fetchOverview returns: { profile: { profile: {...}, rank_tier: ... }, wl: {...}, ... }
+      // So we need to reconstruct that structure
+      const profileData = cachedPlayer.profileData || {};
+      
       return {
-        profile: { profile: cachedPlayer.profileData, ...cachedPlayer },
-        wl: cachedPlayer.winLoss,
-        recentMatches: [], // Recent matches are not cached as they change frequently
-        heroes: cachedPlayer.heroes,
-        peers: cachedPlayer.peers,
-        totals: cachedPlayer.totals,
-        counts: cachedPlayer.counts,
-        ratings: cachedPlayer.ratings,
+        profile: {
+          profile: profileData,
+          rank_tier: cachedPlayer.rankTier ?? null,
+          solo_competitive_rank: cachedPlayer.soloCompetitiveRank ?? null,
+          competitive_rank: cachedPlayer.competitiveRank ?? null,
+          leaderboard_rank: cachedPlayer.leaderboardRank ?? null,
+        },
+        wl: cachedPlayer.winLoss || { win: 0, lose: 0 },
+        recentMatches: recentMatches,
+        heroes: cachedPlayer.heroes || [],
+        peers: cachedPlayer.peers || [],
+        totals: cachedPlayer.totals || [],
+        counts: cachedPlayer.counts || {},
+        ratings: cachedPlayer.ratings || [],
       };
     }
 

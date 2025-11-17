@@ -15,4 +15,8 @@ export declare class AuthController {
     }): Promise<{
         token: string;
     }>;
+    verifyToken(user: any): Promise<{
+        valid: boolean;
+        userId: any;
+    }>;
 }

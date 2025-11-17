@@ -47,7 +47,6 @@ let AnalyticsController = class AnalyticsController {
 exports.AnalyticsController = AnalyticsController;
 __decorate([
     (0, common_1.Post)('compare'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -72,7 +71,6 @@ __decorate([
 ], AnalyticsController.prototype, "getSavedComparisons", null);
 __decorate([
     (0, common_1.Get)('recommendations/:accountId'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Param)('accountId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

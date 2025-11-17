@@ -1,5 +1,7 @@
 export declare class OpenDotaService {
     private readonly logger;
+    private readonly httpClient;
+    constructor();
     isCacheValid(lastUpdated: Date): boolean;
     private handleApiError;
     fetchPlayerInfo(accountId: string): Promise<any>;

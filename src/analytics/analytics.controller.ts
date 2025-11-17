@@ -16,7 +16,6 @@ export class AnalyticsController {
   constructor(private analyticsService: AnalyticsService) {}
 
   @Post('compare')
-  @UseGuards(JwtAuthGuard)
   async comparePlayers(@Body() body: { accountIds: number[] }) {
     return this.analyticsService.comparePlayers(body.accountIds);
   }
@@ -37,7 +36,6 @@ export class AnalyticsController {
   }
 
   @Get('recommendations/:accountId')
-  @UseGuards(JwtAuthGuard)
   async getHeroRecommendations(@Param('accountId') accountId: string) {
     return this.analyticsService.getHeroRecommendations(parseInt(accountId, 10));
   }

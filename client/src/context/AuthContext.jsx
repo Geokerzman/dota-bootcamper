@@ -19,7 +19,20 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-      // Optionally fetch user data here
+      // Verify token is still valid
+      axios.get('/api/auth/verify')
+        .then(() => {
+          // Token is valid
+        })
+        .catch((error) => {
+          // Token is invalid or expired, clear it
+          if (error.response?.status === 401) {
+            console.log('Token expired or invalid, logging out')
+            setToken(null)
+            localStorage.removeItem('token')
+            delete axios.defaults.headers.common['Authorization']
+          }
+        })
     } else {
       delete axios.defaults.headers.common['Authorization']
     }

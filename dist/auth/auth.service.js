@@ -85,11 +85,19 @@ let AuthService = class AuthService {
         return { token };
     }
     async validateUser(userId) {
-        const user = await this.userModel.findByPk(userId);
-        if (!user) {
-            throw new common_1.UnauthorizedException('User not found');
+        try {
+            const user = await this.userModel.findByPk(userId);
+            if (!user) {
+                throw new common_1.UnauthorizedException('User not found');
+            }
+            return user;
         }
-        return user;
+        catch (error) {
+            if (error instanceof common_1.UnauthorizedException) {
+                throw error;
+            }
+            throw new common_1.UnauthorizedException('Failed to validate user');
+        }
     }
 };
 exports.AuthService = AuthService;

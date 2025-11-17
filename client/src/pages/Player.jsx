@@ -40,7 +40,8 @@ export default function Player() {
     if (!query) return
     if (searchMode === 'name') {
       try {
-        const { data } = await axios.get(`https://api.opendota.com/api/search`, { params: { q: query } })
+        // Use backend API endpoint instead of calling OpenDota directly
+        const { data } = await axios.get(`/api/playerinfo/search`, { params: { q: query } })
         setSearchResults(data)
       } catch {
         setSearchResults([])
@@ -61,62 +62,63 @@ export default function Player() {
       try {
         const { data } = await axios.get(`/api/playerinfo/overview`, { params: { account_id: idToLoad } })
         console.log('Overview data:', data) // Debug log
+
+        // The profile is nested: data.profile.profile contains the actual profile data
+        const profileData = data.profile?.profile || data.profile || {}
+        const profileInfo = {
+          account_id: profileData.account_id ?? null,
+          personaname: profileData.personaname ?? null,
+          name: profileData.name ?? null,
+          steamid: profileData.steamid ?? null,
+          avatarmedium: profileData.avatarmedium ?? null,
+          avatarfull: profileData.avatarfull ?? null,
+          last_login: profileData.last_login ?? null,
+          profileurl: profileData.profileurl ?? `https://steamcommunity.com/profiles/${profileData.steamid || profileData.account_id}`,
+        }
         
-        // The overview endpoint returns data directly, not nested under profile
-        const profile = data.profile || {}
-        setPlayerInfo({
-          rank_tier: data.profile?.rank_tier ?? null,
-          profile: {
-            account_id: profile.account_id ?? null,
-            personaname: profile.personaname ?? null,
-            name: profile.name ?? null,
-            steamid: profile.steamid ?? null,
-            avatarmedium: profile.avatarmedium ?? null,
-            last_login: profile.last_login ?? null,
-            profileurl: profile.profileurl ?? null,
-          },
-          wl: data.wl,
-          recentMatches: data.recentMatches,
-          heroes: data.heroes,
-          peers: data.peers,
-          totals: data.totals,
-          counts: data.counts,
-          ratings: data.ratings,
-        })
+        const playerData = {
+          rank_tier: data.profile?.rank_tier ?? data.rank_tier ?? null,
+          profile: profileInfo,
+          wl: data.wl || { win: 0, lose: 0 },
+          recentMatches: data.recentMatches || [],
+          heroes: data.heroes || [],
+          peers: data.peers || [],
+          totals: data.totals || [],
+          counts: data.counts || {},
+          ratings: data.ratings || [],
+        }
+        
+        setPlayerInfo(playerData)
       } catch (overviewErr) {
         console.log('Overview endpoint failed, using fallback:', overviewErr.message)
-        // Fallback to individual API calls
-        const [profileData, wlData, recentData, heroesData, peersData] = await Promise.all([
-          axios.get(`https://api.opendota.com/api/players/${idToLoad}`),
-          axios.get(`https://api.opendota.com/api/players/${idToLoad}/wl`),
-          axios.get(`https://api.opendota.com/api/players/${idToLoad}/recentMatches`),
-          axios.get(`https://api.opendota.com/api/players/${idToLoad}/heroes`),
-          axios.get(`https://api.opendota.com/api/players/${idToLoad}/peers`),
-        ])
-        
-        const profile = profileData.data.profile || {}
-        setPlayerInfo({
-          rank_tier: profileData.data.rank_tier ?? null,
-          profile: {
-            account_id: profile.account_id ?? null,
-            personaname: profile.personaname ?? null,
-            name: profile.name ?? null,
-            steamid: profile.steamid ?? null,
-            avatarmedium: profile.avatarmedium ?? null,
-            last_login: profile.last_login ?? null,
-            profileurl: profile.profileurl ?? null,
-          },
-          wl: wlData.data,
-          recentMatches: recentData.data,
-          heroes: heroesData.data,
-          peers: peersData.data,
-          totals: [],
-          counts: [],
-          ratings: [],
-        })
+        // Fallback: Just use the basic player info endpoint
+        try {
+          const { data: playerData } = await axios.get(`/api/playerinfo`, { params: { account_id: idToLoad } })
+          const profile = playerData[0]?.profile || {}
+          setPlayerInfo({
+            rank_tier: playerData[0]?.rank_tier ?? null,
+            profile: {
+              account_id: profile.account_id ?? null,
+              personaname: profile.personaname ?? null,
+              name: profile.name ?? null,
+              steamid: profile.steamid ?? null,
+              avatarmedium: profile.avatarmedium ?? null,
+              last_login: profile.last_login ?? null,
+              profileurl: profile.profileurl ?? null,
+            },
+            wl: { win: 0, lose: 0 },
+            recentMatches: [],
+            heroes: [],
+            peers: [],
+            totals: [],
+            counts: [],
+            ratings: [],
+          })
+        } catch (fallbackErr) {
+          throw overviewErr // Re-throw original error if fallback also fails
+        }
       }
       setShowSearch(false)
-      await fetchLastMatchStats(idToLoad)
           } catch (err) {
         setPlayerInfo(null)
         const serverMsg = err?.response?.data?.message || err?.message || 'Unknown error'
@@ -135,19 +137,19 @@ export default function Player() {
     if (!playerInfo) return null
     const tier = playerInfo.rank_tier
     if (!tier) return <div className="text-sm text-gray-400">Unranked</div>
-    
+
     // Correct rank calculation based on OpenDota's system
     const major = Math.floor(tier / 10)
     const minor = tier % 10
-    
+
     const rankNames = {
       1: 'Herald', 2: 'Guardian', 3: 'Crusader', 4: 'Archon',
       5: 'Legend', 6: 'Ancient', 7: 'Divine', 8: 'Immortal'
     }
-    
+
     const rankName = rankNames[major] || 'Unknown'
     const rankLevel = minor || 5
-    
+
     // Create a single image element that tries different sources
     const getRankImageSrc = () => {
       const possibleSources = [
@@ -159,7 +161,7 @@ export default function Player() {
       ]
       return possibleSources[0] // Start with the first one
     }
-    
+
     return (
       <div className="flex flex-col items-center gap-2">
         <div className="text-sm font-semibold">{rankName} {rankLevel}</div>
@@ -186,17 +188,73 @@ export default function Player() {
     )
   }
 
-  const fetchLastMatchStats = async (id) => {
+  // Use useEffect to fetch last match stats after component renders
+  useEffect(() => {
+    // Cleanup: destroy chart when component unmounts or playerInfo changes
+    return () => {
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy()
+        chartInstanceRef.current = null
+      }
+    }
+  }, [playerInfo])
+
+  useEffect(() => {
+    if (playerInfo?.recentMatches && playerInfo.recentMatches.length > 0 && !showSearch) {
+      let retryTimer = null
+      
+      // Wait for canvas to be rendered
+      const timer = setTimeout(() => {
+        if (chartRef.current) {
+          fetchLastMatchStats(playerInfo.recentMatches)
+        } else {
+          // Retry after a short delay if canvas isn't ready
+          retryTimer = setTimeout(() => {
+            if (chartRef.current) {
+              fetchLastMatchStats(playerInfo.recentMatches)
+            }
+          }, 200)
+        }
+      }, 100)
+      
+      return () => {
+        clearTimeout(timer)
+        if (retryTimer) {
+          clearTimeout(retryTimer)
+        }
+      }
+    }
+  }, [playerInfo, showSearch])
+
+  const fetchLastMatchStats = async (matches) => {
     setIsLoadingStats(true)
     try {
-      const { data } = await axios.get(`https://api.opendota.com/api/players/${id}/recentMatches`)
-      if (data && data.length > 0) {
-        const lastMatch = data[0]
+      // matches is either an array of matches or playerInfo.recentMatches
+      const matchArray = Array.isArray(matches) ? matches : (playerInfo?.recentMatches || [])
+      
+      if (matchArray && matchArray.length > 0) {
+        const lastMatch = matchArray[0]
         setLastStats(lastMatch)
-        
+
+        // Wait a bit to ensure canvas is rendered
+        await new Promise(resolve => setTimeout(resolve, 150))
+
+        // Check if canvas ref is available
+        if (!chartRef.current) {
+          console.warn('Canvas ref not available yet, retrying...')
+          // Retry once more
+          await new Promise(resolve => setTimeout(resolve, 200))
+          if (!chartRef.current) {
+            console.error('Canvas ref still not available')
+            setIsLoadingStats(false)
+            return
+          }
+        }
+
         // Create chart
         if (chartInstanceRef.current) {
           chartInstanceRef.current.destroy()
+          chartInstanceRef.current = null
         }
         
         const ctx = chartRef.current.getContext('2d')
@@ -299,18 +357,18 @@ export default function Player() {
           <h1 className="text-4xl font-bold mb-4">Dota 2 Player Explorer</h1>
           <p className="text-gray-400">Search for players by name or Steam ID</p>
         </div>
-        
+
         <div className="dota-card max-w-2xl mx-auto">
           <div className="border-b border-white/5 p-6">
             <h2 className="text-2xl font-semibold mb-4">Search Player</h2>
             <form onSubmit={searchPlayers}>
               <div className="mb-6 flex items-center justify-center gap-4">
                 <span className={`text-lg ${searchMode === 'name' ? 'text-white' : 'text-gray-400'}`}>Name</span>
-                <button 
-                  type="button" 
-                  role="switch" 
-                  aria-checked={searchMode === 'id'} 
-                  onClick={() => setSearchMode(prev => prev === 'name' ? 'id' : 'name')} 
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={searchMode === 'id'}
+                  onClick={() => setSearchMode(prev => prev === 'name' ? 'id' : 'name')}
                   className={`relative inline-flex h-8 w-16 items-center rounded-full transition ${searchMode === 'id' ? 'bg-dotaAccent' : 'bg-white/20'}`}
                 >
                   <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition ${searchMode === 'id' ? 'translate-x-9' : 'translate-x-1'}`} />
@@ -319,17 +377,17 @@ export default function Player() {
               </div>
               <div className="mb-6">
                 <label className="block text-lg mb-2">{searchMode === 'name' ? 'Enter Player Name' : 'Enter Account ID'}</label>
-                <input 
-                  className="dota-input w-full text-lg p-4" 
-                  value={query} 
-                  onChange={e => setQuery(e.target.value)} 
-                  placeholder={searchMode === 'name' ? 'e.g. Miracle-' : 'e.g. 123456789'} 
+                <input
+                  className="dota-input w-full text-lg p-4"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder={searchMode === 'name' ? 'e.g. Miracle-' : 'e.g. 123456789'}
                 />
               </div>
               <button type="submit" className="dota-btn w-full text-lg p-4">Search</button>
             </form>
           </div>
-          
+
           {searchResults.length > 0 && (
             <div className="p-6">
               <h3 className="text-xl font-semibold mb-4">Search Results</h3>
@@ -344,16 +402,16 @@ export default function Player() {
                           <div className="text-sm text-gray-400">Account ID: {p.account_id}</div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <a 
-                            href={`https://www.opendota.com/players/${p.account_id}`} 
-                            target="_blank" 
-                            rel="noreferrer" 
+                          <a
+                            href={`https://www.opendota.com/players/${p.account_id}`}
+                            target="_blank"
+                            rel="noreferrer"
                             className="text-sm text-dotaAccent hover:underline"
                           >
                             OpenDota
                           </a>
-                          <button 
-                            className="dota-btn" 
+                          <button
+                            className="dota-btn"
                             onClick={() => { setAccountId(p.account_id); loadPlayer(p.account_id); }}
                           >
                             View Profile
@@ -397,24 +455,29 @@ export default function Player() {
                 itemId={playerInfo.profile.account_id}
                 itemName={playerInfo.profile.personaname}
               />
-              <a href={playerInfo.profile.profileurl} target="_blank" className="dota-btn" rel="noreferrer">
-                Steam Profile
-              </a>
+              {playerInfo.profile.profileurl && (
+                <a href={playerInfo.profile.profileurl} target="_blank" className="dota-btn" rel="noreferrer">
+                  Steam Profile
+                </a>
+              )}
             </div>
           </div>
-          
+
           <div className="flex items-center gap-6">
-            <img 
-              src={playerInfo.profile.avatarmedium} 
-              alt="Player Avatar" 
-              className="w-32 h-32 rounded-full border-4 border-white/10" 
+            <img
+              src={playerInfo.profile.avatarmedium || playerInfo.profile.avatarfull || '/default-avatar.png'}
+              alt="Player Avatar"
+              className="w-32 h-32 rounded-full border-4 border-white/10"
+              onError={(e) => {
+                e.target.src = '/default-avatar.png'
+              }}
             />
             <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-2">{playerInfo.profile.personaname}</h1>
+              <h1 className="text-4xl font-bold mb-2">{playerInfo.profile.personaname || playerInfo.profile.name || 'Unknown Player'}</h1>
               <div className="flex items-center gap-4 text-gray-400">
-                <span>Account ID: {playerInfo.profile.account_id}</span>
-                <span>Steam ID: {playerInfo.profile.steamid}</span>
-                <span>Last Login: {formatDate(playerInfo.profile.last_login)}</span>
+                <span>Account ID: {playerInfo.profile.account_id || 'N/A'}</span>
+                {playerInfo.profile.steamid && <span>Steam ID: {playerInfo.profile.steamid}</span>}
+                {playerInfo.profile.last_login && <span>Last Login: {formatDate(playerInfo.profile.last_login)}</span>}
               </div>
             </div>
             <div className="text-center">
@@ -438,7 +501,9 @@ export default function Player() {
           </div>
           <div className="dota-card p-6 text-center">
             <div className="text-3xl font-bold text-blue-400">
-              {playerInfo.wl ? Math.round((playerInfo.wl.win / (playerInfo.wl.win + playerInfo.wl.lose)) * 100) : 0}%
+              {playerInfo.wl && (playerInfo.wl.win + playerInfo.wl.lose) > 0 
+                ? Math.round((playerInfo.wl.win / (playerInfo.wl.win + playerInfo.wl.lose)) * 100) 
+                : 0}%
             </div>
             <div className="text-gray-400">Win Rate</div>
           </div>
@@ -448,6 +513,29 @@ export default function Player() {
           </div>
         </div>
 
+        {/* Additional Statistics from Totals */}
+        {playerInfo.totals && playerInfo.totals.length > 0 && (
+          <section className="dota-card mb-8">
+            <div className="border-b border-white/5 p-6">
+              <h2 className="text-2xl font-semibold">Additional Statistics</h2>
+            </div>
+            <div className="p-6">
+              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {playerInfo.totals.slice(0, 12).map((stat, idx) => {
+                  const statName = stat.field?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || `Stat ${idx + 1}`
+                  const statValue = stat.sum || stat.n || 0
+                  return (
+                    <div key={idx} className="bg-white/5 rounded-lg p-4">
+                      <div className="text-sm text-gray-400 mb-1">{statName}</div>
+                      <div className="text-xl font-semibold">{statValue.toLocaleString()}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Last Match Stats */}
         <section className="dota-card mb-8">
           <div className="border-b border-white/5 p-6">
@@ -455,8 +543,13 @@ export default function Player() {
           </div>
           <div className="p-6 grid md:grid-cols-3 gap-6 items-start">
             <div className="md:col-span-2">
-              <div className="bg-white/5 rounded-lg p-4 h-64">
-                <canvas ref={chartRef} />
+              <div className="bg-white/5 rounded-lg p-4 h-64 relative">
+                {isLoadingStats && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
+                    <div className="text-gray-400">Loading chart...</div>
+                  </div>
+                )}
+                <canvas ref={chartRef} className="w-full h-full" />
               </div>
             </div>
             <div className="md:col-span-1">
@@ -482,7 +575,7 @@ export default function Player() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="dota-card p-4">
                     <h3 className="font-semibold mb-3">Performance</h3>
                     <div className="space-y-2 text-sm">
@@ -538,8 +631,8 @@ export default function Player() {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           {getHeroImage(match.hero_id) && (
-                            <img 
-                              src={getHeroImage(match.hero_id)} 
+                            <img
+                              src={getHeroImage(match.hero_id)}
                               alt={getHeroName(match.hero_id)}
                               className="w-8 h-8 rounded"
                             />
@@ -585,30 +678,34 @@ export default function Player() {
                 <div key={idx} className="dota-card p-4">
                   <div className="flex items-center gap-4 mb-3">
                     {getHeroImage(hero.hero_id) && (
-                      <img 
-                        src={getHeroImage(hero.hero_id)} 
+                      <img
+                        src={getHeroImage(hero.hero_id)}
                         alt={getHeroName(hero.hero_id)}
                         className="w-12 h-12 rounded"
                       />
                     )}
                     <div>
                       <div className="font-semibold">{getHeroName(hero.hero_id)}</div>
-                      <div className="text-sm text-gray-400">{hero.games} games</div>
+                      <div className="text-sm text-gray-400">{hero.games || 0} games</div>
                     </div>
                   </div>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-400">Wins</span>
-                      <span className="text-green-400 font-semibold">{hero.win}</span>
+                      <span className="text-green-400 font-semibold">{hero.win || 0}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Win Rate</span>
-                      <span className="font-semibold">{Math.round((hero.win / hero.games) * 100)}%</span>
+                      <span className="font-semibold">
+                        {hero.games > 0 ? Math.round((hero.win / hero.games) * 100) : 0}%
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Avg KDA</span>
                       <span className="font-semibold">
-                        {Math.round((hero.kills + hero.assists) / Math.max(hero.deaths, 1) * 10) / 10}
+                        {hero.deaths > 0 
+                          ? (Math.round((hero.kills + hero.assists) / hero.deaths * 10) / 10).toFixed(2)
+                          : (hero.kills + hero.assists).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -629,9 +726,9 @@ export default function Player() {
                 {playerInfo.peers.slice(0, 6).map((peer, idx) => (
                   <div key={idx} className="dota-card p-4">
                     <div className="flex items-center gap-3 mb-3">
-                      <img 
-                        src={peer.avatar} 
-                        alt="Peer Avatar" 
+                      <img
+                        src={peer.avatar}
+                        alt="Peer Avatar"
                         className="w-10 h-10 rounded-full"
                       />
                       <div>
@@ -642,7 +739,9 @@ export default function Player() {
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-400">Win Rate</span>
-                        <span className="font-semibold">{Math.round((peer.win / peer.games) * 100)}%</span>
+                        <span className="font-semibold">
+                          {peer.games > 0 ? Math.round((peer.win / peer.games) * 100) : 0}%
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">With</span>

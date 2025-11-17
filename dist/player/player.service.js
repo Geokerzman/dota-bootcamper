@@ -217,15 +217,29 @@ let PlayerService = PlayerService_1 = class PlayerService {
             cachedPlayer.counts &&
             cachedPlayer.ratings) {
             this.logger.debug(`Using cached overview for account_id: ${accountId}`);
+            let recentMatches = [];
+            try {
+                recentMatches = await this.openDotaService.fetchRecentMatches(accountId, 20);
+            }
+            catch (error) {
+                this.logger.warn(`Failed to fetch recent matches for cached player ${accountId}: ${error.message}`);
+            }
+            const profileData = cachedPlayer.profileData || {};
             return {
-                profile: { profile: cachedPlayer.profileData, ...cachedPlayer },
-                wl: cachedPlayer.winLoss,
-                recentMatches: [],
-                heroes: cachedPlayer.heroes,
-                peers: cachedPlayer.peers,
-                totals: cachedPlayer.totals,
-                counts: cachedPlayer.counts,
-                ratings: cachedPlayer.ratings,
+                profile: {
+                    profile: profileData,
+                    rank_tier: cachedPlayer.rankTier ?? null,
+                    solo_competitive_rank: cachedPlayer.soloCompetitiveRank ?? null,
+                    competitive_rank: cachedPlayer.competitiveRank ?? null,
+                    leaderboard_rank: cachedPlayer.leaderboardRank ?? null,
+                },
+                wl: cachedPlayer.winLoss || { win: 0, lose: 0 },
+                recentMatches: recentMatches,
+                heroes: cachedPlayer.heroes || [],
+                peers: cachedPlayer.peers || [],
+                totals: cachedPlayer.totals || [],
+                counts: cachedPlayer.counts || {},
+                ratings: cachedPlayer.ratings || [],
             };
         }
         if (!cachedPlayer) {

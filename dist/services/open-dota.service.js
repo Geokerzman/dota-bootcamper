@@ -5,6 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -13,11 +16,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OpenDotaService = void 0;
 const common_1 = require("@nestjs/common");
 const axios_1 = __importDefault(require("axios"));
-const OPEN_DOTA_API_BASE_URL = 'https://api.opendota.com/api';
 const CACHE_TTL_HOURS = 24;
 let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     constructor() {
         this.logger = new common_1.Logger(OpenDotaService_1.name);
+        this.httpClient = axios_1.default.create({
+            baseURL: 'https://api.opendota.com/api',
+            timeout: 30000,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
     }
     isCacheValid(lastUpdated) {
         const now = new Date();
@@ -50,9 +60,8 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async fetchPlayerInfo(accountId) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/players/${accountId}`;
             this.logger.debug(`Fetching player info for account_id: ${accountId}`);
-            const { data } = await axios_1.default.get(url);
+            const { data } = await this.httpClient.get(`/players/${accountId}`);
             return data;
         }
         catch (error) {
@@ -61,8 +70,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async fetchPlayerTotals(accountId, queryParams = {}) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/players/${accountId}/totals`;
-            const { data } = await axios_1.default.get(url, { params: queryParams });
+            const { data } = await this.httpClient.get(`/players/${accountId}/totals`, { params: queryParams });
             return data;
         }
         catch (error) {
@@ -71,8 +79,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async fetchPlayerCounts(accountId, queryParams = {}) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/players/${accountId}/counts`;
-            const { data } = await axios_1.default.get(url, { params: queryParams });
+            const { data } = await this.httpClient.get(`/players/${accountId}/counts`, { params: queryParams });
             return data;
         }
         catch (error) {
@@ -81,8 +88,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async searchPlayers(query) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/search`;
-            const { data } = await axios_1.default.get(url, { params: { q: query } });
+            const { data } = await this.httpClient.get('/search', { params: { q: query } });
             return data;
         }
         catch (error) {
@@ -91,8 +97,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async fetchHistogram(accountId, field, queryParams = {}) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/players/${accountId}/histograms/${field}`;
-            const { data } = await axios_1.default.get(url, { params: queryParams });
+            const { data } = await this.httpClient.get(`/players/${accountId}/histograms/${field}`, { params: queryParams });
             return data;
         }
         catch (error) {
@@ -101,8 +106,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async fetchWinLoss(accountId) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/players/${accountId}/wl`;
-            const { data } = await axios_1.default.get(url);
+            const { data } = await this.httpClient.get(`/players/${accountId}/wl`);
             return data;
         }
         catch (error) {
@@ -111,8 +115,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async fetchRecentMatches(accountId, limit = 20) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/players/${accountId}/recentMatches`;
-            const { data } = await axios_1.default.get(url, { params: { limit } });
+            const { data } = await this.httpClient.get(`/players/${accountId}/recentMatches`, { params: { limit } });
             return data;
         }
         catch (error) {
@@ -121,8 +124,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async fetchHeroes(accountId) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/players/${accountId}/heroes`;
-            const { data } = await axios_1.default.get(url);
+            const { data } = await this.httpClient.get(`/players/${accountId}/heroes`);
             return data;
         }
         catch (error) {
@@ -131,8 +133,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async fetchPeers(accountId) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/players/${accountId}/peers`;
-            const { data } = await axios_1.default.get(url);
+            const { data } = await this.httpClient.get(`/players/${accountId}/peers`);
             return data;
         }
         catch (error) {
@@ -141,8 +142,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async fetchRatings(accountId) {
         try {
-            const url = `${OPEN_DOTA_API_BASE_URL}/players/${accountId}/ratings`;
-            const { data } = await axios_1.default.get(url);
+            const { data } = await this.httpClient.get(`/players/${accountId}/ratings`);
             return data;
         }
         catch (error) {
@@ -164,7 +164,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async getPlayerSummaries(accountId) {
         try {
-            const response = await axios_1.default.get(`${OPEN_DOTA_API_BASE_URL}/players/${accountId}`);
+            const response = await this.httpClient.get(`/players/${accountId}`);
             return response.data;
         }
         catch (error) {
@@ -174,7 +174,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async getMatchHistory(accountId) {
         try {
-            const response = await axios_1.default.get(`${OPEN_DOTA_API_BASE_URL}/players/${accountId}/matches`);
+            const response = await this.httpClient.get(`/players/${accountId}/matches`);
             return response.data;
         }
         catch (error) {
@@ -184,7 +184,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async getMatchDetail(matchId) {
         try {
-            const response = await axios_1.default.get(`${OPEN_DOTA_API_BASE_URL}/matches/${matchId}`);
+            const response = await this.httpClient.get(`/matches/${matchId}`);
             return response.data;
         }
         catch (error) {
@@ -194,7 +194,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async getMatchData(matchId) {
         try {
-            const response = await axios_1.default.get(`${OPEN_DOTA_API_BASE_URL}/matches/${matchId}`);
+            const response = await this.httpClient.get(`/matches/${matchId}`);
             return response.data;
         }
         catch (error) {
@@ -203,7 +203,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async getHeroes() {
         try {
-            const response = await axios_1.default.get(`${OPEN_DOTA_API_BASE_URL}/heroes`);
+            const response = await this.httpClient.get('/heroes');
             return response.data;
         }
         catch (error) {
@@ -212,7 +212,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async getLiveGames() {
         try {
-            const response = await axios_1.default.get(`${OPEN_DOTA_API_BASE_URL}/live`);
+            const response = await this.httpClient.get('/live');
             return response.data;
         }
         catch (error) {
@@ -221,7 +221,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async getProPlayers() {
         try {
-            const response = await axios_1.default.get(`${OPEN_DOTA_API_BASE_URL}/proPlayers`);
+            const response = await this.httpClient.get('/proPlayers');
             return response.data;
         }
         catch (error) {
@@ -230,7 +230,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async getPublicMatches() {
         try {
-            const response = await axios_1.default.get(`${OPEN_DOTA_API_BASE_URL}/publicMatches`);
+            const response = await this.httpClient.get('/publicMatches');
             return response.data;
         }
         catch (error) {
@@ -239,7 +239,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
     }
     async getProMatches() {
         try {
-            const response = await axios_1.default.get(`${OPEN_DOTA_API_BASE_URL}/proMatches`);
+            const response = await this.httpClient.get('/proMatches');
             return response.data;
         }
         catch (error) {
@@ -249,6 +249,7 @@ let OpenDotaService = OpenDotaService_1 = class OpenDotaService {
 };
 exports.OpenDotaService = OpenDotaService;
 exports.OpenDotaService = OpenDotaService = OpenDotaService_1 = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
 ], OpenDotaService);
 //# sourceMappingURL=open-dota.service.js.map

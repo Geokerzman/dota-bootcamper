@@ -11,14 +11,14 @@ import { DatabaseModule } from '../database/database.module';
   imports: [
     DatabaseModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'your-secret-key',
-        signOptions: { expiresIn: '1h' },
+      JwtModule.registerAsync({
+        imports: [ConfigModule],
+        useFactory: async (configService: ConfigService) => ({
+          secret: configService.get<string>('JWT_SECRET') || 'your-secret-key',
+          signOptions: { expiresIn: '30d' }, // Extended to 30 days for better UX
+        }),
+        inject: [ConfigService],
       }),
-      inject: [ConfigService],
-    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

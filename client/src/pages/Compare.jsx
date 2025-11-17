@@ -44,7 +44,8 @@ export default function Compare() {
       setComparison(data)
     } catch (error) {
       console.error('Failed to compare players:', error)
-      alert('Failed to compare players. Please check the account IDs.')
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to compare players'
+      alert(`Failed to compare players: ${errorMsg}. Please check the account IDs.`)
     } finally {
       setLoading(false)
     }

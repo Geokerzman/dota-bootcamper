@@ -30,7 +30,10 @@ export default function AddToLibrary({ itemType, itemId, itemName }) {
 
   const handleToggle = async () => {
     if (!isAuthenticated) {
-      alert('Please log in to use the library feature')
+      const shouldLogin = confirm('Please log in to use the library feature. Would you like to go to the login page?')
+      if (shouldLogin) {
+        window.location.href = '/login'
+      }
       return
     }
 
@@ -45,14 +48,39 @@ export default function AddToLibrary({ itemType, itemId, itemName }) {
       }
     } catch (error) {
       console.error('Failed to update library:', error)
-      alert('Failed to update library')
+      
+      // Check if token expired
+      if (error.response?.status === 401) {
+        const shouldLogin = confirm('Your session has expired. Please log in again to continue.')
+        if (shouldLogin) {
+          // Clear token and redirect
+          localStorage.removeItem('token')
+          window.location.href = '/login'
+        }
+        return
+      }
+      
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to update library'
+      alert(`Failed to update library: ${errorMsg}`)
     } finally {
       setLoading(false)
     }
   }
 
-  if (!isAuthenticated || checking) {
+  if (checking) {
     return null
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <button
+        onClick={handleToggle}
+        className="px-3 py-1.5 rounded-md text-sm font-medium bg-white/10 text-gray-300 hover:bg-white/20"
+        title="Login to add to library"
+      >
+        ⭐ Login to Add
+      </button>
+    )
   }
 
   return (
