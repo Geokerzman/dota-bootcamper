@@ -19,6 +19,8 @@ export class HeroService {
       const heroesInfo = heroes.map((hero) => ({
         id: hero.id,
         name: hero.name,
+        img: hero.img,
+        icon: hero.icon,
         localized_name: hero.localized_name,
         primary_attr: hero.primary_attr,
         attack_type: hero.attack_type,
