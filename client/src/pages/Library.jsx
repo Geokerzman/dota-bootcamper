@@ -183,15 +183,27 @@ export default function Library() {
             const itemType = item.itemType || item.item_type
             const itemId = item.itemId || item.item_id
             const itemName = item.itemName || item.item_name
+            const itemAvatar = item.metadata?.avatar || ''
+            const rankTier = item.metadata?.rankTier
             const notes = item.notes || ''
+
+            console.log(item)
             
             return (
               <div key={`${itemType}-${itemId}`} className="dota-card p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{getItemIcon(itemType)}</span>
-                    <div>
+                    <img
+                        src={itemAvatar}
+                        alt={itemName || `Item ${itemId}`}
+                        className="w-16 h-16 rounded-full border border-gray-500/10"
+                    />                    <div>
                       <h3 className="font-semibold text-lg">{itemName || `Item ${itemId}`}</h3>
+                    {rankTier ? (
+                        <p className="text-sm text-white/60">Rank: {rankTier}</p>
+                    ) : (
+                        <p className="text-sm text-white/40">No rank data</p>
+                    )}
                       <p className="text-sm text-gray-400 capitalize">{itemType}</p>
                     </div>
                   </div>
